@@ -23,7 +23,8 @@ export default async function PricingPage() {
       <div className="grid md:grid-cols-2 gap-8 max-w-xl mx-auto">
         <PricingCard
           name={basePlan?.name || 'Base'}
-          price={basePrice?.unitAmount || 800}
+          price={basePrice?.unitAmount || 800000}
+          currency={basePrice?.currency || 'ngn'}
           interval={basePrice?.interval || 'month'}
           trialDays={basePrice?.trialPeriodDays || 7}
           features={[
@@ -35,7 +36,8 @@ export default async function PricingPage() {
         />
         <PricingCard
           name={plusPlan?.name || 'Plus'}
-          price={plusPrice?.unitAmount || 1200}
+          price={plusPrice?.unitAmount || 1200000}
+          currency={plusPrice?.currency || 'ngn'}
           interval={plusPrice?.interval || 'month'}
           trialDays={plusPrice?.trialPeriodDays || 7}
           features={[
@@ -53,6 +55,7 @@ export default async function PricingPage() {
 function PricingCard({
   name,
   price,
+  currency,
   interval,
   trialDays,
   features,
@@ -60,11 +63,18 @@ function PricingCard({
 }: {
   name: string;
   price: number;
+  currency: string;
   interval: string;
   trialDays: number;
   features: string[];
   priceId?: string;
 }) {
+  const formattedPrice = new Intl.NumberFormat('en-NG', {
+    style: 'currency',
+    currency: currency.toUpperCase(),
+    maximumFractionDigits: 0,
+  }).format(price / 100);
+
   return (
     <div className="pt-6">
       <h2 className="text-2xl font-medium text-gray-900 mb-2">{name}</h2>
@@ -72,7 +82,7 @@ function PricingCard({
         with {trialDays} day free trial
       </p>
       <p className="text-4xl font-medium text-gray-900 mb-6">
-        ${price / 100}{' '}
+        {formattedPrice}{' '}
         <span className="text-xl font-normal text-gray-600">
           per user / {interval}
         </span>

@@ -1,6 +1,6 @@
 import type { NextConfig } from 'next';
 
-/** §3.8 — pragmatic CSP for App Router + Stripe.js + optional OIDC SSO. */
+/** §3.8 — pragmatic CSP for App Router + Paystack + optional OIDC SSO. */
 function buildContentSecurityPolicy() {
   const extraConnect =
     process.env.AUTH_SSO_CSP_ORIGINS?.split(',')
@@ -15,15 +15,14 @@ function buildContentSecurityPolicy() {
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",
     "style-src 'self' 'unsafe-inline'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.paystack.co",
     [
       "connect-src 'self'",
-      'https://api.stripe.com',
-      'https://m.stripe.network',
-      'https://*.stripe.com',
+      'https://api.paystack.co',
+      'https://checkout.paystack.com',
       ...extraConnect
     ].join(' '),
-    "frame-src https://js.stripe.com https://hooks.stripe.com"
+    "frame-src https://js.paystack.co https://checkout.paystack.com"
   ];
 
   return base.join('; ');

@@ -148,7 +148,7 @@ export default function IntegrationHubPage() {
                 Shell billing
               </CardTitle>
               <CardDescription className="text-xs">
-                Subscription lives in the shell (Stripe / Paystack); domain payouts stay inside each
+                Subscription lives in the shell (Paystack); domain payouts stay inside each
                 backend until unified.
               </CardDescription>
             </CardHeader>

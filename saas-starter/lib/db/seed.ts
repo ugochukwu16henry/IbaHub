@@ -28,8 +28,8 @@ async function createStripeProducts() {
 
   await stripe.prices.create({
     product: baseProduct.id,
-    unit_amount: 800, // $8 in cents
-    currency: 'usd',
+    unit_amount: 800000, // NGN 8,000 in kobo
+    currency: 'ngn',
     recurring: {
       interval: 'month',
       trial_period_days: 7,
@@ -43,8 +43,8 @@ async function createStripeProducts() {
 
   await stripe.prices.create({
     product: plusProduct.id,
-    unit_amount: 1200, // $12 in cents
-    currency: 'usd',
+    unit_amount: 1200000, // NGN 12,000 in kobo
+    currency: 'ngn',
     recurring: {
       interval: 'month',
       trial_period_days: 7,

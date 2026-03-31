@@ -28,7 +28,7 @@ export default function HubPaymentsPage() {
         Payments &amp; fintech (§3.7)
       </h1>
       <p className="text-sm text-muted-foreground mb-8">
-        Unified shell billing (Stripe) plus placeholders for domain wallets and
+        Unified shell billing (Paystack) plus placeholders for domain wallets and
         local providers. Wire each backend, then forward settlement webhooks to{' '}
         <code className="text-xs bg-gray-100 px-0.5 rounded">
           /api/webhooks/payments/domain
@@ -40,7 +40,7 @@ export default function HubPaymentsPage() {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <CreditCard className="size-4" />
-            Shell billing (Stripe)
+            Shell billing (Paystack)
           </CardTitle>
           <CardDescription>
             Team subscription and checkout live on the core platform (
@@ -62,8 +62,8 @@ export default function HubPaymentsPage() {
         Domain payment modes
       </h2>
       <p className="text-xs text-muted-foreground mb-4">
-        Set optional env flags per backend (e.g. <code>stripe_connect</code>,{' '}
-        <code>paystack</code>, <code>manual</code>). Implement capture in each
+        Set optional env flags per backend (e.g. <code>paystack</code>,{' '}
+        <code>wallet</code>, <code>manual</code>). Implement capture in each
         service; the shell only coordinates identity and tenant headers.
       </p>
       <ul className="space-y-3">

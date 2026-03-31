@@ -175,16 +175,16 @@ export async function getStripePrices() {
       {
         id: 'base-local',
         productId: 'base-local-product',
-        unitAmount: 800,
-        currency: 'usd',
+        unitAmount: 800000,
+        currency: 'ngn',
         interval: 'month',
         trialPeriodDays: 7
       },
       {
         id: 'plus-local',
         productId: 'plus-local-product',
-        unitAmount: 1200,
-        currency: 'usd',
+        unitAmount: 1200000,
+        currency: 'ngn',
         interval: 'month',
         trialPeriodDays: 7
       }

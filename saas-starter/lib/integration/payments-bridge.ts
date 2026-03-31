@@ -1,10 +1,10 @@
 /**
  * INTEGRATION_PLAN.md §3.7 — Fintech & payments bridge.
- * Shell uses Stripe; domain services keep wallets/payouts until unified.
+ * Shell uses Paystack; domain services keep wallets/payouts until unified.
  */
 
 export type ShellBillingInfo = {
-  provider: 'stripe';
+  provider: 'paystack';
   pricingPath: string;
   teamSettingsPath: string;
 };
@@ -36,7 +36,7 @@ export const DOMAIN_PAYMENT_SLOTS: DomainPaymentSlot[] = [
 
 export function getShellBilling(): ShellBillingInfo {
   return {
-    provider: 'stripe',
+    provider: 'paystack',
     pricingPath: '/pricing',
     teamSettingsPath: '/dashboard'
   };
