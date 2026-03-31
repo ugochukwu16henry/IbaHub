@@ -54,7 +54,7 @@ export default function IntegrationHubPage() {
           </CardHeader>
           <CardContent className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">Base URLs in .env</span>
-            <Button size="xs" variant="outline" asChild>
+            <Button size="sm" variant="outline" asChild>
               <Link href="/dashboard/hub/data">Open domain data</Link>
             </Button>
           </CardContent>
@@ -70,7 +70,7 @@ export default function IntegrationHubPage() {
           </CardHeader>
           <CardContent className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">/api/integration/health</span>
-            <Button size="xs" variant="outline" asChild>
+            <Button size="sm" variant="outline" asChild>
               <Link href="/dashboard/hub/roadmap">View roadmap</Link>
             </Button>
           </CardContent>
@@ -85,10 +85,10 @@ export default function IntegrationHubPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-between text-xs">
-            <Button size="xs" variant="outline" asChild>
+            <Button size="sm" variant="outline" asChild>
               <Link href="/dashboard/hub/tenants">Tenant mappings</Link>
             </Button>
-            <Button size="xs" variant="outline" asChild>
+            <Button size="sm" variant="outline" asChild>
               <Link href="/sign-in">Auth & SSO</Link>
             </Button>
           </CardContent>
@@ -135,7 +135,7 @@ export default function IntegrationHubPage() {
             </CardHeader>
             <CardContent className="flex items-center justify-between text-xs text-muted-foreground">
               <span>Header secrets from .env; Idempotency-Key dedupes inbound events.</span>
-              <Button size="xs" variant="outline" asChild>
+              <Button size="sm" variant="outline" asChild>
                 <Link href="/dashboard/activity">View activity</Link>
               </Button>
             </CardContent>
@@ -153,10 +153,10 @@ export default function IntegrationHubPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex items-center justify-between text-xs">
-              <Button size="xs" variant="outline" asChild>
+              <Button size="sm" variant="outline" asChild>
                 <Link href="/pricing">Pricing</Link>
               </Button>
-              <Button size="xs" variant="outline" asChild>
+              <Button size="sm" variant="outline" asChild>
                 <Link href="/dashboard/hub/payments">Domain payouts</Link>
               </Button>
             </CardContent>
