@@ -1,6 +1,7 @@
 import { desc, eq } from 'drizzle-orm';
-import { db } from '@/lib/db/drizzle';
 import { isOwnerAdmin } from '@/lib/admin/auth';
+import { toCsv } from '@/lib/admin/csv';
+import { db } from '@/lib/db/drizzle';
 import { payoutLedger, riderProfiles, users } from '@/lib/db/schema';
 import { processDuePayouts } from '@/lib/payments/rider-payouts';
 
@@ -8,8 +9,7 @@ export const runtime = 'nodejs';
 
 export async function GET() {
   await processDuePayouts();
-  const allowed = await isOwnerAdmin();
-  if (!allowed) {
+  if (!(await isOwnerAdmin())) {
     return Response.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -20,8 +20,9 @@ export async function GET() {
       amountNetKobo: payoutLedger.amountNetKobo,
       status: payoutLedger.status,
       transferReference: payoutLedger.transferReference,
+      releaseAfterAt: payoutLedger.releaseAfterAt,
       createdAt: payoutLedger.createdAt,
-      riderId: riderProfiles.id,
+      updatedAt: payoutLedger.updatedAt,
       riderName: users.name,
       riderEmail: users.email
     })
@@ -30,6 +31,39 @@ export async function GET() {
     .innerJoin(users, eq(riderProfiles.userId, users.id))
     .orderBy(desc(payoutLedger.createdAt));
 
-  return Response.json({ payouts });
+  const csv = toCsv(
+    [
+      'id',
+      'bookingId',
+      'amountNetKobo',
+      'status',
+      'transferReference',
+      'releaseAfterAt',
+      'createdAt',
+      'updatedAt',
+      'riderName',
+      'riderEmail'
+    ],
+    payouts.map((p) => [
+      p.id,
+      p.bookingId,
+      p.amountNetKobo,
+      p.status,
+      p.transferReference || '',
+      p.releaseAfterAt ? p.releaseAfterAt.toISOString() : '',
+      p.createdAt.toISOString(),
+      p.updatedAt.toISOString(),
+      p.riderName || '',
+      p.riderEmail
+    ])
+  );
+
+  return new Response(csv, {
+    status: 200,
+    headers: {
+      'content-type': 'text/csv; charset=utf-8',
+      'content-disposition': 'attachment; filename="payouts.csv"'
+    }
+  });
 }
 

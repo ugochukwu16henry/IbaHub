@@ -1,19 +1,10 @@
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/drizzle';
-import { getTeamForUser, getUser } from '@/lib/db/queries';
+import { isOwnerAdmin } from '@/lib/admin/auth';
 import { payoutLedger } from '@/lib/db/schema';
 import { releaseRiderPayoutById } from '@/lib/payments/rider-payouts';
 
 export const runtime = 'nodejs';
-
-async function isOwnerAdmin() {
-  const user = await getUser();
-  if (!user) return false;
-  const team = await getTeamForUser();
-  if (!team) return false;
-  const member = team.teamMembers.find((m) => m.userId === user.id);
-  return member?.role === 'owner';
-}
 
 export async function POST(
   _request: Request,

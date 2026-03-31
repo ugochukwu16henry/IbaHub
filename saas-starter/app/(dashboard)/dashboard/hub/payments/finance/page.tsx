@@ -89,6 +89,20 @@ export default function AdminFinancePage() {
         </Link>
       </Button>
       <h1 className="text-lg lg:text-2xl font-medium">Admin Finance & Audit</h1>
+      <div className="flex flex-wrap gap-2">
+        <Button variant="outline" size="sm" asChild>
+          <a href="/api/admin/finance/export/users">Export users CSV</a>
+        </Button>
+        <Button variant="outline" size="sm" asChild>
+          <a href="/api/admin/finance/export/payouts">Export payouts CSV</a>
+        </Button>
+        <Button variant="outline" size="sm" asChild>
+          <a href="/api/admin/finance/export/pnl-monthly">Export monthly P&L CSV</a>
+        </Button>
+        <Button variant="outline" size="sm" asChild>
+          <a href="/api/admin/finance/export/audit">Export audit CSV</a>
+        </Button>
+      </div>
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {!data ? (
