@@ -37,6 +37,18 @@ export const teams = pgTable('teams', {
   lastPaystackPaymentReference: varchar('last_paystack_payment_reference', {
     length: 120
   }),
+  businessPhone: varchar('business_phone', { length: 30 }),
+  businessWhatsapp: varchar('business_whatsapp', { length: 30 }),
+  businessAddress: text('business_address'),
+  businessLat: integer('business_lat'),
+  businessLng: integer('business_lng'),
+  businessCategory: varchar('business_category', { length: 80 }),
+  shopSlug: varchar('shop_slug', { length: 120 }),
+  isStorefrontPublic: boolean('is_storefront_public').notNull().default(false),
+  inventoryAddonActive: boolean('inventory_addon_active').notNull().default(false),
+  businessProfileCompleted: boolean('business_profile_completed')
+    .notNull()
+    .default(false),
   /** JSON: logisticsOrgId, gigOrgId, retailOrgId for upstream tenancy */
   integrationMappings: text('integration_mappings'),
 });
@@ -455,6 +467,30 @@ export const retailInventoryAdjustments = pgTable('retail_inventory_adjustments'
   createdAt: timestamp('created_at').notNull().defaultNow()
 });
 
+export const retailPurchaseRequests = pgTable('retail_purchase_requests', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id),
+  buyerUserId: integer('buyer_user_id')
+    .notNull()
+    .references(() => users.id),
+  itemId: integer('item_id')
+    .notNull()
+    .references(() => retailItems.id),
+  quantity: integer('quantity').notNull(),
+  agreedUnitPriceKobo: integer('agreed_unit_price_kobo').notNull(),
+  totalAmountKobo: integer('total_amount_kobo').notNull(),
+  paymentTerms: varchar('payment_terms', { length: 40 }).notNull().default('agreed_with_owner'),
+  needsDelivery: boolean('needs_delivery').notNull().default(false),
+  deliveryFrom: varchar('delivery_from', { length: 16 }).notNull().default('shop'),
+  deliveryAddress: text('delivery_address'),
+  notes: text('notes'),
+  status: varchar('status', { length: 24 }).notNull().default('requested'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow()
+});
+
 export const teamsRelations = relations(teams, ({ many }) => ({
   teamMembers: many(teamMembers),
   activityLogs: many(activityLogs),
@@ -653,6 +689,8 @@ export type RetailPosTransaction = typeof retailPosTransactions.$inferSelect;
 export type NewRetailPosTransaction = typeof retailPosTransactions.$inferInsert;
 export type RetailInventoryAdjustment = typeof retailInventoryAdjustments.$inferSelect;
 export type NewRetailInventoryAdjustment = typeof retailInventoryAdjustments.$inferInsert;
+export type RetailPurchaseRequest = typeof retailPurchaseRequests.$inferSelect;
+export type NewRetailPurchaseRequest = typeof retailPurchaseRequests.$inferInsert;
 export type TeamDataWithMembers = Team & {
   teamMembers: (TeamMember & {
     user: Pick<User, 'id' | 'name' | 'email'>;

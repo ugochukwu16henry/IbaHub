@@ -9,7 +9,7 @@ const schema = z.object({ name: z.string().min(1), abbreviation: z.string().opti
 
 export async function GET() {
   try {
-    const { team } = await requireRetailContext();
+    const { team } = await requireRetailContext({ requireInventoryAddon: true });
     const rows = await db
       .select()
       .from(retailUnits)
@@ -23,7 +23,10 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { team } = await requireRetailContext({ ownerWrite: true });
+    const { team } = await requireRetailContext({
+      ownerWrite: true,
+      requireInventoryAddon: true
+    });
     const parsed = schema.safeParse(await readJson(request));
     if (!parsed.success) return Response.json({ error: 'Invalid payload' }, { status: 400 });
     const [row] = await db.insert(retailUnits).values({ teamId: team.id, ...parsed.data }).returning();

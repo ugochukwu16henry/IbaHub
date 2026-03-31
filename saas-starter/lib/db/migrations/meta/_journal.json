@@ -92,6 +92,27 @@
       "when": 1774935000000,
       "tag": "0012_retail_native_parity",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1774940000000,
+      "tag": "0013_business_profile_onboarding",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1774945000000,
+      "tag": "0014_storefront_purchase_requests",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1774950000000,
+      "tag": "0015_business_contact_location",
+      "breakpoints": true
     }
   ]
 }

@@ -12,8 +12,8 @@ export default async function PricingPage() {
     getPaystackProducts(),
   ]);
 
-  const basePlan = products.find((product) => product.name === 'Base');
-  const plusPlan = products.find((product) => product.name === 'Plus');
+  const basePlan = products.find((product) => product.name === 'Business');
+  const plusPlan = products.find((product) => product.name === 'Business + Inventory');
 
   const basePrice = prices.find((price) => price.productId === basePlan?.id);
   const plusPrice = prices.find((price) => price.productId === plusPlan?.id);
@@ -22,28 +22,28 @@ export default async function PricingPage() {
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="grid md:grid-cols-2 gap-8 max-w-xl mx-auto">
         <PricingCard
-          name={basePlan?.name || 'Base'}
-          price={basePrice?.unitAmount || 800000}
+          name={basePlan?.name || 'Business'}
+          price={basePrice?.unitAmount || 1000000}
           currency={basePrice?.currency || 'ngn'}
           interval={basePrice?.interval || 'month'}
           trialDays={basePrice?.trialPeriodDays || 7}
           features={[
-            'Unlimited Usage',
-            'Unlimited Workspace Members',
-            'Email Support',
+            'Upload products with prices and categories',
+            'Public storefront for buyers',
+            'Basic support'
           ]}
           priceId={basePrice?.id}
         />
         <PricingCard
-          name={plusPlan?.name || 'Plus'}
-          price={plusPrice?.unitAmount || 1200000}
+          name={plusPlan?.name || 'Business + Inventory'}
+          price={plusPrice?.unitAmount || 2500000}
           currency={plusPrice?.currency || 'ngn'}
           interval={plusPrice?.interval || 'month'}
           trialDays={plusPrice?.trialPeriodDays || 7}
           features={[
-            'Everything in Base, and:',
-            'Early Access to New Features',
-            '24/7 Support + Slack Access',
+            'Everything in Business plan',
+            'QUANTUM-STASH inventory module (stock/warehouse/POS)',
+            'Priority support'
           ]}
           priceId={plusPrice?.id}
         />
@@ -84,7 +84,7 @@ function PricingCard({
       <p className="text-4xl font-medium text-gray-900 mb-6">
         {formattedPrice}{' '}
         <span className="text-xl font-normal text-gray-600">
-          per user / {interval}
+          per month
         </span>
       </p>
       <ul className="space-y-4 mb-8">

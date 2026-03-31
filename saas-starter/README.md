@@ -120,7 +120,22 @@ Use your Paystack test keys and test cards in the Paystack dashboard to validate
   - `/api/retail/warehouses` + `/api/retail/warehouses/:id`
   - `/api/retail/inventory-adjustments`
 - New DB migration for native parity: `0012_retail_native_parity.sql`
+- Onboarding flow:
+  - `Create business profile` on `/dashboard/hub/retail`
+  - Auto-creates default retail warehouse and starter units
+  - `First product wizard` appears after active subscription and zero inventory
+- Public storefront:
+  - `/shops` lists public business shops
+  - `/shops/:slug` shows products and lets buyers submit purchase requests
+  - Buyers can view business map location and contact owner via phone/WhatsApp
+  - Buyers can request rider/truck delivery and jump to `/dashboard/rides/book`
+- Purchase flow:
+  - Buyer submits purchase request with agreed payment terms (`upfront`, `on_delivery`, etc.)
+  - Business owner reviews requests at `/dashboard/hub/retail/purchase-requests`
 
+- Business billing:
+  - `Business` plan: **NGN 10,000/month** (upload products, prices, categories, public shop)
+  - `Business + Inventory` plan: **NGN 25,000/month** (includes QUANTUM-STASH inventory suite)
 - Card Number: `4242 4242 4242 4242`
 - Expiration: Any future date
 - CVC: Any 3-digit number

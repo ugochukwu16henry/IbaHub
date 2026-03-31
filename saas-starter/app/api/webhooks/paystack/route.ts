@@ -143,6 +143,7 @@ export async function POST(request: NextRequest) {
       .set({
         planName: selected.product.name,
         subscriptionStatus: 'active',
+        inventoryAddonActive: selected.price.id === 'plus-local',
         subscriptionRenewsAt: renewsAt,
         lastPaystackPaymentReference: reference,
         updatedAt: new Date()

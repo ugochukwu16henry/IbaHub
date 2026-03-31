@@ -5,7 +5,7 @@ import { requireRetailContext, toHttpError } from '@/lib/retail/auth';
 
 export async function GET() {
   try {
-    const { team } = await requireRetailContext();
+    const { team } = await requireRetailContext({ requireInventoryAddon: true });
     const rows = await db
       .select()
       .from(retailInventoryAdjustments)

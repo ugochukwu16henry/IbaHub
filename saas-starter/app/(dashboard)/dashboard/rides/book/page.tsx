@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -41,6 +42,7 @@ const money = (kobo: number) =>
   }).format(kobo / 100);
 
 export default function RideBookingPage() {
+  const searchParams = useSearchParams();
   const [pickupLabel, setPickupLabel] = useState('Campus main gate');
   const [dropoffLabel, setDropoffLabel] = useState('Hostel block B');
   const [pickupLat, setPickupLat] = useState<number | null>(null);
@@ -91,6 +93,13 @@ export default function RideBookingPage() {
     const data = await res.json();
     if (res.ok) setMyBookings(data.bookings || []);
   }
+
+  useEffect(() => {
+    const pickup = searchParams.get('pickupLabel');
+    const dropoff = searchParams.get('dropoffLabel');
+    if (pickup) setPickupLabel(pickup);
+    if (dropoff) setDropoffLabel(dropoff);
+  }, [searchParams]);
 
   useEffect(() => {
     refreshBookings();

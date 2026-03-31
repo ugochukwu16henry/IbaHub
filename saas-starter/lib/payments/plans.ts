@@ -18,7 +18,7 @@ export const LOCAL_PRICES: LocalPrice[] = [
   {
     id: 'base-local',
     productId: 'base-local-product',
-    unitAmount: 800000,
+    unitAmount: 1000000,
     currency: 'ngn',
     interval: 'month',
     trialPeriodDays: 7
@@ -26,7 +26,7 @@ export const LOCAL_PRICES: LocalPrice[] = [
   {
     id: 'plus-local',
     productId: 'plus-local-product',
-    unitAmount: 1200000,
+    unitAmount: 2500000,
     currency: 'ngn',
     interval: 'month',
     trialPeriodDays: 7
@@ -36,14 +36,14 @@ export const LOCAL_PRICES: LocalPrice[] = [
 export const LOCAL_PRODUCTS: LocalProduct[] = [
   {
     id: 'base-local-product',
-    name: 'Base',
-    description: 'Base subscription plan',
+    name: 'Business',
+    description: 'Business storefront plan (upload products and pricing)',
     defaultPriceId: 'base-local'
   },
   {
     id: 'plus-local-product',
-    name: 'Plus',
-    description: 'Plus subscription plan',
+    name: 'Business + Inventory',
+    description: 'Business plan plus QUANTUM-STASH inventory suite',
     defaultPriceId: 'plus-local'
   }
 ];

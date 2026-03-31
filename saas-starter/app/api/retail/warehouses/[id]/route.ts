@@ -9,7 +9,7 @@ const schema = z.object({ name: z.string().min(1), address: z.string().optional(
 
 export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {
   try {
-    const { team } = await requireRetailContext();
+    const { team } = await requireRetailContext({ requireInventoryAddon: true });
     const id = parseId((await context.params).id);
     const [row] = await db
       .select()
@@ -25,7 +25,10 @@ export async function GET(_: Request, context: { params: Promise<{ id: string }>
 
 export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
-    const { team } = await requireRetailContext({ ownerWrite: true });
+    const { team } = await requireRetailContext({
+      ownerWrite: true,
+      requireInventoryAddon: true
+    });
     const id = parseId((await context.params).id);
     const parsed = schema.partial().safeParse(await readJson(request));
     if (!parsed.success) return Response.json({ error: 'Invalid payload' }, { status: 400 });
@@ -43,7 +46,10 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
 
 export async function DELETE(_: Request, context: { params: Promise<{ id: string }> }) {
   try {
-    const { team } = await requireRetailContext({ ownerWrite: true });
+    const { team } = await requireRetailContext({
+      ownerWrite: true,
+      requireInventoryAddon: true
+    });
     const id = parseId((await context.params).id);
     await db
       .delete(retailWarehouses)

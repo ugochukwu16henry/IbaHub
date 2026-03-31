@@ -1,6 +1,9 @@
 import { getTeamForUser, getUser } from '@/lib/db/queries';
 
-export async function requireRetailContext(opts?: { ownerWrite?: boolean }) {
+export async function requireRetailContext(opts?: {
+  ownerWrite?: boolean;
+  requireInventoryAddon?: boolean;
+}) {
   const user = await getUser();
   if (!user) {
     throw new Error('UNAUTHORIZED');
@@ -12,6 +15,9 @@ export async function requireRetailContext(opts?: { ownerWrite?: boolean }) {
   }
   if (team.subscriptionStatus !== 'active') {
     throw new Error('SUBSCRIPTION_INACTIVE');
+  }
+  if (opts?.requireInventoryAddon && !team.inventoryAddonActive) {
+    throw new Error('INVENTORY_ADDON_REQUIRED');
   }
 
   if (opts?.ownerWrite) {
@@ -31,6 +37,12 @@ export function toHttpError(error: unknown) {
   if (message === 'FORBIDDEN') return Response.json({ error: 'Forbidden' }, { status: 403 });
   if (message === 'SUBSCRIPTION_INACTIVE') {
     return Response.json({ error: 'Active subscription required' }, { status: 402 });
+  }
+  if (message === 'INVENTORY_ADDON_REQUIRED') {
+    return Response.json(
+      { error: 'Inventory add-on required for this feature' },
+      { status: 402 }
+    );
   }
   return Response.json({ error: 'Request failed' }, { status: 500 });
 }

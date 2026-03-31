@@ -7,7 +7,7 @@ import { posInputSchema, readJson } from '@/app/api/retail/_shared';
 
 export async function GET() {
   try {
-    const { team } = await requireRetailContext();
+    const { team } = await requireRetailContext({ requireInventoryAddon: true });
     const rows = await db
       .select()
       .from(retailPosTransactions)
@@ -21,7 +21,10 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { team } = await requireRetailContext({ ownerWrite: true });
+    const { team } = await requireRetailContext({
+      ownerWrite: true,
+      requireInventoryAddon: true
+    });
     const parsed = posInputSchema.safeParse(await readJson(request));
     if (!parsed.success) return Response.json({ error: 'Invalid payload' }, { status: 400 });
     const tx = await createPosTransaction({ teamId: team.id, ...parsed.data });
