@@ -84,6 +84,11 @@ export async function getActivityLogs() {
     throw new Error('User not authenticated');
   }
 
+  const team = await getTeamForUser();
+  if (!team) {
+    return [];
+  }
+
   return await db
     .select({
       id: activityLogs.id,
@@ -94,9 +99,9 @@ export async function getActivityLogs() {
     })
     .from(activityLogs)
     .leftJoin(users, eq(activityLogs.userId, users.id))
-    .where(eq(activityLogs.userId, user.id))
+    .where(eq(activityLogs.teamId, team.id))
     .orderBy(desc(activityLogs.timestamp))
-    .limit(10);
+    .limit(25);
 }
 
 export async function getTeamForUser() {

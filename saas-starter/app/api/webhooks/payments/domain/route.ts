@@ -11,27 +11,29 @@ import {
 export const runtime = 'nodejs';
 
 /**
- * Inbound hook for cross-service events. Configure your bus or upstream
- * systems to POST here with header X-IbaHub-Webhook-Secret.
- * Optional: include teamId in JSON body or X-IbaHub-Team-Id to record in team activity.
+ * Settlement / wallet events from logistics, gig, or retail backends.
+ * INTEGRATION_PLAN §3.7 — keep idempotent handlers in each service; this is the shell ingress.
  */
 export async function POST(request: NextRequest) {
   const limited = webhookRateLimitResponse(request);
   if (limited) return limited;
 
-  const expected = process.env.INTEGRATION_INBOUND_WEBHOOK_SECRET?.trim();
+  const expected = process.env.INTEGRATION_PAYMENTS_WEBHOOK_SECRET?.trim();
   if (!expected) {
     return NextResponse.json(
-      { error: 'INTEGRATION_INBOUND_WEBHOOK_SECRET is not set' },
+      { error: 'INTEGRATION_PAYMENTS_WEBHOOK_SECRET is not set' },
       { status: 503 }
     );
   }
 
-  const provided = request.headers.get('x-ibahub-webhook-secret')?.trim();
+  const provided =
+    request.headers.get('x-ibahub-payments-secret')?.trim() ||
+    request.headers.get('x-ibahub-webhook-secret')?.trim();
   if (provided !== expected) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const idempotencyKey = request.headers.get('idempotency-key')?.trim();
   const contentType = request.headers.get('content-type') ?? '';
   let payload: unknown;
   if (contentType.includes('application/json')) {
@@ -44,20 +46,19 @@ export async function POST(request: NextRequest) {
     payload = await request.text();
   }
 
-  const idempotencyKey = request.headers.get('idempotency-key')?.trim();
   const headerTeam = request.headers.get('x-ibahub-team-id');
   const teamId = extractTeamId(payload, headerTeam);
 
   const claim = await tryClaimWebhookInbox(
     idempotencyKey,
-    'integration',
+    'payments',
     teamId
   );
   const duplicate = claim === 'duplicate';
 
   if (teamId !== null && !duplicate) {
     await persistTeamWebhookActivity({
-      baseAction: ActivityType.WEBHOOK_INTEGRATION,
+      baseAction: ActivityType.WEBHOOK_PAYMENT_DOMAIN,
       teamId,
       ipAddress: getWebhookClientIp(request),
       payload
@@ -69,6 +70,7 @@ export async function POST(request: NextRequest) {
     at: new Date().toISOString(),
     duplicate,
     teamActivityLogged: teamId !== null && !duplicate,
+    idempotencyKey: idempotencyKey ?? null,
     bytes:
       typeof payload === 'string' ? payload.length : JSON.stringify(payload).length
   });

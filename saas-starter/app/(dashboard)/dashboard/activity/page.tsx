@@ -9,6 +9,7 @@ import {
   UserMinus,
   Mail,
   CheckCircle,
+  Webhook,
   type LucideIcon,
 } from 'lucide-react';
 import { ActivityType } from '@/lib/db/schema';
@@ -25,6 +26,8 @@ const iconMap: Record<ActivityType, LucideIcon> = {
   [ActivityType.REMOVE_TEAM_MEMBER]: UserMinus,
   [ActivityType.INVITE_TEAM_MEMBER]: Mail,
   [ActivityType.ACCEPT_INVITATION]: CheckCircle,
+  [ActivityType.WEBHOOK_INTEGRATION]: Webhook,
+  [ActivityType.WEBHOOK_PAYMENT_DOMAIN]: Webhook,
 };
 
 function getRelativeTime(date: Date) {
@@ -41,8 +44,31 @@ function getRelativeTime(date: Date) {
   return date.toLocaleDateString();
 }
 
-function formatAction(action: ActivityType): string {
-  switch (action) {
+function formatAction(action: string): string {
+  if (
+    action === ActivityType.WEBHOOK_INTEGRATION ||
+    action.startsWith(`${ActivityType.WEBHOOK_INTEGRATION}:`)
+  ) {
+    const detail = action.startsWith(`${ActivityType.WEBHOOK_INTEGRATION}:`)
+      ? action.slice(ActivityType.WEBHOOK_INTEGRATION.length + 1)
+      : '';
+    return detail
+      ? `Cross-service webhook: ${detail}`
+      : 'Cross-service webhook received';
+  }
+  if (
+    action === ActivityType.WEBHOOK_PAYMENT_DOMAIN ||
+    action.startsWith(`${ActivityType.WEBHOOK_PAYMENT_DOMAIN}:`)
+  ) {
+    const detail = action.startsWith(`${ActivityType.WEBHOOK_PAYMENT_DOMAIN}:`)
+      ? action.slice(ActivityType.WEBHOOK_PAYMENT_DOMAIN.length + 1)
+      : '';
+    return detail
+      ? `Payout / settlement webhook: ${detail}`
+      : 'Payout / settlement webhook received';
+  }
+
+  switch (action as ActivityType) {
     case ActivityType.SIGN_UP:
       return 'You signed up';
     case ActivityType.SIGN_IN:
@@ -84,10 +110,12 @@ export default async function ActivityPage() {
           {logs.length > 0 ? (
             <ul className="space-y-4">
               {logs.map((log) => {
-                const Icon = iconMap[log.action as ActivityType] || Settings;
-                const formattedAction = formatAction(
-                  log.action as ActivityType
-                );
+                const Icon =
+                  log.action.startsWith(ActivityType.WEBHOOK_INTEGRATION) ||
+                  log.action.startsWith(ActivityType.WEBHOOK_PAYMENT_DOMAIN)
+                    ? Webhook
+                    : iconMap[log.action as ActivityType] || Settings;
+                const formattedAction = formatAction(log.action);
 
                 return (
                   <li key={log.id} className="flex items-center space-x-4">

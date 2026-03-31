@@ -90,6 +90,9 @@ The **saas-starter** app is the unified shell. In-dashboard views mirror this do
 | §3.2 boundaries & contracts | roadmap page + API | `lib/integration/boundaries.ts`, `contracts/openapi/*.yaml`, `GET /api/integration/contracts`, `GET /api/integration/openapi/[service]` |
 | §3.3 identity / tenants / SSO | `/dashboard/hub/tenants`, `/api/auth/sso/*` | `teams.integration_mappings`; OIDC + PKCE; `users.oauth_provider`, `users.oauth_sub` |
 | §3.5–3.6 domain lists | `/dashboard/hub/data` | `INTEGRATION_*_LIST_PATH`, `lib/integration/domain-data.ts` |
+| §3.7 fintech / payouts | `/dashboard/hub/payments` | `lib/integration/payments-bridge.ts`; `POST /api/webhooks/payments/domain` |
+| §3.8 security headers | — | `next.config.ts` `headers` (incl. CSP); `e2e/security-headers.spec.ts`; webhook rate limit + `Idempotency-Key` → `webhook_inbox` |
+| Cross-service → activity | `/dashboard/activity` | Webhooks with `teamId` / `X-IbaHub-Team-Id`; `lib/integration/webhook-persist.ts`; team-scoped log |
 | §3.4 modular UI | `/dashboard/hub`, `/dashboard/hub/slices/…` | Vertical slices per domain |
 | §4 Docker / API-first | — | Run upstream repos with their own Docker; shell connects via `INTEGRATION_*_URL` |
 

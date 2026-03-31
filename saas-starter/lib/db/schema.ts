@@ -5,6 +5,7 @@ import {
   text,
   timestamp,
   integer,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -57,6 +58,24 @@ export const activityLogs = pgTable('activity_logs', {
   timestamp: timestamp('timestamp').notNull().defaultNow(),
   ipAddress: varchar('ip_address', { length: 45 }),
 });
+
+/** Dedupe inbound webhooks by Idempotency-Key + source (§3.8 / productized ingress). */
+export const webhookInbox = pgTable(
+  'webhook_inbox',
+  {
+    id: serial('id').primaryKey(),
+    idempotencyKey: text('idempotency_key').notNull(),
+    source: varchar('source', { length: 32 }).notNull(),
+    teamId: integer('team_id').references(() => teams.id),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => ({
+    keySourceIdx: uniqueIndex('webhook_inbox_key_source').on(
+      t.idempotencyKey,
+      t.source
+    ),
+  })
+);
 
 export const invitations = pgTable('invitations', {
   id: serial('id').primaryKey(),
@@ -124,6 +143,8 @@ export type TeamMember = typeof teamMembers.$inferSelect;
 export type NewTeamMember = typeof teamMembers.$inferInsert;
 export type ActivityLog = typeof activityLogs.$inferSelect;
 export type NewActivityLog = typeof activityLogs.$inferInsert;
+export type WebhookInbox = typeof webhookInbox.$inferSelect;
+export type NewWebhookInbox = typeof webhookInbox.$inferInsert;
 export type Invitation = typeof invitations.$inferSelect;
 export type NewInvitation = typeof invitations.$inferInsert;
 export type TeamDataWithMembers = Team & {
@@ -143,4 +164,8 @@ export enum ActivityType {
   REMOVE_TEAM_MEMBER = 'REMOVE_TEAM_MEMBER',
   INVITE_TEAM_MEMBER = 'INVITE_TEAM_MEMBER',
   ACCEPT_INVITATION = 'ACCEPT_INVITATION',
+  /** Cross-service integration webhook (payload may include teamId) */
+  WEBHOOK_INTEGRATION = 'WEBHOOK_INTEGRATION',
+  /** Domain payout / settlement webhook */
+  WEBHOOK_PAYMENT_DOMAIN = 'WEBHOOK_PAYMENT_DOMAIN'
 }

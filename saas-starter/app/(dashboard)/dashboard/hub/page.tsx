@@ -60,6 +60,9 @@ export default function IntegrationHubPage() {
         <Button variant="outline" size="sm" asChild>
           <Link href="/dashboard/hub/data">Domain data (§3.5–3.6)</Link>
         </Button>
+        <Button variant="outline" size="sm" asChild>
+          <Link href="/dashboard/hub/payments">Payments (§3.7)</Link>
+        </Button>
       </div>
 
       <IntegrationHubHealth items={healthItems} />

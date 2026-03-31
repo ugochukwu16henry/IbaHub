@@ -81,7 +81,7 @@ export const HARMONIZATION_STEPS: HarmonizationStep[] = [
     ],
     status: 'partial',
     implementationHint:
-      'Retail slice: /dashboard/hub/slices/retail; cross-service flows via webhooks + gateway headers.'
+      'Retail slice: /dashboard/hub/slices/retail; webhooks with teamId (or X-IbaHub-Team-Id) persist to team activity; disable with INTEGRATION_WEBHOOK_PERSIST_ACTIVITY=false.'
   },
   {
     step: 7,
@@ -92,7 +92,7 @@ export const HARMONIZATION_STEPS: HarmonizationStep[] = [
     ],
     status: 'partial',
     implementationHint:
-      'Shell billing: Stripe + /pricing; domain wallets and local providers in each backend next.'
+      'Hub: /dashboard/hub/payments; lib/integration/payments-bridge.ts; domain payout webhook POST /api/webhooks/payments/domain (INTEGRATION_PAYMENTS_WEBHOOK_SECRET); optional INTEGRATION_*_PAYMENT_MODE per backend.'
   },
   {
     step: 8,
@@ -104,7 +104,7 @@ export const HARMONIZATION_STEPS: HarmonizationStep[] = [
     ],
     status: 'partial',
     implementationHint:
-      'e2e smoke: pnpm test:e2e; gateway auth + webhook secret; rotate credentials if exposed.'
+      'e2e: pnpm test:e2e (smoke + security-headers); next.config.ts CSP + security headers; gateway auth + webhook secrets; webhook POST rate limit (WEBHOOK_RATE_LIMIT_PER_MINUTE) + Idempotency-Key → webhook_inbox dedupe; rotate credentials if exposed.'
   }
 ];
 
