@@ -175,7 +175,13 @@ export const serviceRequests = pgTable('service_requests', {
   grossAmountKobo: integer('gross_amount_kobo').notNull(),
   platformFeeKobo: integer('platform_fee_kobo').notNull(),
   providerEarningsKobo: integer('provider_earnings_kobo').notNull(),
+  paystackReference: varchar('paystack_reference', { length: 120 }),
   paidAt: timestamp('paid_at'),
+  providerCompletedAt: timestamp('provider_completed_at'),
+  customerConfirmedAt: timestamp('customer_confirmed_at'),
+  payoutStatus: varchar('payout_status', { length: 30 })
+    .notNull()
+    .default('not_ready'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });

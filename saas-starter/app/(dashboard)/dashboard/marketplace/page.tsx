@@ -14,6 +14,7 @@ import {
 } from '@/lib/db/schema';
 import { getTeamForUser, getUser } from '@/lib/db/queries';
 import {
+  confirmServiceCompletionAction,
   createServiceListingAction,
   createServiceRequestAction,
   markServiceRequestPaidAction,
@@ -78,6 +79,7 @@ export default async function MarketplacePage() {
       grossAmountKobo: serviceRequests.grossAmountKobo,
       platformFeeKobo: serviceRequests.platformFeeKobo,
       providerEarningsKobo: serviceRequests.providerEarningsKobo,
+      payoutStatus: serviceRequests.payoutStatus,
       message: serviceRequests.message,
       contactPhone: serviceRequests.contactPhone,
       createdAt: serviceRequests.createdAt,
@@ -99,6 +101,7 @@ export default async function MarketplacePage() {
       grossAmountKobo: serviceRequests.grossAmountKobo,
       platformFeeKobo: serviceRequests.platformFeeKobo,
       providerEarningsKobo: serviceRequests.providerEarningsKobo,
+      payoutStatus: serviceRequests.payoutStatus,
       message: serviceRequests.message,
       createdAt: serviceRequests.createdAt,
       listingTitle: serviceListings.title,
@@ -333,7 +336,9 @@ export default async function MarketplacePage() {
                         <input type="hidden" name="requestId" value={request.id} />
                         <input type="hidden" name="status" value={status} />
                         <Button type="submit" size="sm" variant="outline">
-                          Mark {status.replace('_', ' ')}
+                          {status === 'completed'
+                            ? 'Mark work done (await customer confirm)'
+                            : `Mark ${status.replace('_', ' ')}`}
                         </Button>
                       </form>
                     ))}
@@ -373,6 +378,19 @@ export default async function MarketplacePage() {
                 ) : (
                   <p className="text-xs text-green-600">Payment received by platform.</p>
                 )}
+                {request.status === 'awaiting_confirmation' ? (
+                  <form action={confirmServiceCompletionAction} className="pt-1">
+                    <input type="hidden" name="requestId" value={request.id} />
+                    <Button type="submit" size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
+                      Confirm service completion
+                    </Button>
+                  </form>
+                ) : null}
+                {request.payoutStatus === 'ready_for_payout' ? (
+                  <p className="text-xs text-green-700">
+                    Completion confirmed. Provider payout is now ready.
+                  </p>
+                ) : null}
                 {request.message ? <p className="text-sm">{request.message}</p> : null}
                 {request.status === 'completed' && !reviewedRequestSet.has(request.id) ? (
                   <form action={submitServiceReviewAction} className="grid md:grid-cols-3 gap-2 pt-1">

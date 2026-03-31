@@ -2,6 +2,7 @@
 
 import { and, eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { db } from '@/lib/db/drizzle';
 import {
   providerProfiles,
@@ -11,6 +12,7 @@ import {
   teamMembers,
 } from '@/lib/db/schema';
 import { getUser, getTeamForUser } from '@/lib/db/queries';
+import { initializePaystackTransaction } from '@/lib/payments/paystack-marketplace';
 
 function toKobo(amountNaira: string) {
   const parsed = Number(amountNaira);
@@ -161,17 +163,31 @@ export async function markServiceRequestPaidAction(formData: FormData) {
     return;
   }
 
-  // TODO: Replace with actual Paystack charge verification webhook flow.
+  const reference = `svc_req_${request.id}_${Date.now()}`;
+  const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+  const callbackUrl = `${baseUrl}/dashboard/marketplace?payment=callback`;
+  const tx = await initializePaystackTransaction({
+    email: user.email,
+    amountKobo: request.grossAmountKobo,
+    reference,
+    callbackUrl,
+    metadata: {
+      serviceRequestId: request.id,
+      providerTeamId: request.providerTeamId,
+      platformFeeKobo: request.platformFeeKobo,
+      providerEarningsKobo: request.providerEarningsKobo,
+    },
+  });
+
   await db
     .update(serviceRequests)
     .set({
-      paymentStatus: 'paid',
-      paidAt: new Date(),
+      paystackReference: tx.reference,
       updatedAt: new Date(),
     })
     .where(eq(serviceRequests.id, requestId));
 
-  revalidatePath('/dashboard/marketplace');
+  redirect(tx.authorization_url);
 }
 
 export async function updateServiceRequestStatusAction(formData: FormData) {
@@ -193,6 +209,24 @@ export async function updateServiceRequestStatusAction(formData: FormData) {
     .limit(1);
 
   if (!request) throw new Error('Request not found');
+
+  if (status === 'in_progress' && request.paymentStatus !== 'paid') {
+    throw new Error('Customer payment must be confirmed before work starts');
+  }
+
+  if (status === 'completed') {
+    await db
+      .update(serviceRequests)
+      .set({
+        status: 'awaiting_confirmation',
+        providerCompletedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(serviceRequests.id, requestId));
+
+    revalidatePath('/dashboard/marketplace');
+    return;
+  }
 
   await db
     .update(serviceRequests)
@@ -233,6 +267,42 @@ export async function submitServiceReviewAction(formData: FormData) {
       comment: comment || null,
     })
     .onConflictDoNothing();
+
+  revalidatePath('/dashboard/marketplace');
+}
+
+export async function confirmServiceCompletionAction(formData: FormData) {
+  const user = await getUser();
+  if (!user) throw new Error('Unauthorized');
+
+  const requestId = Number(formData.get('requestId'));
+  if (!requestId) throw new Error('Invalid request');
+
+  const [request] = await db
+    .select()
+    .from(serviceRequests)
+    .where(eq(serviceRequests.id, requestId))
+    .limit(1);
+
+  if (!request || request.requesterUserId !== user.id) {
+    throw new Error('Request not found');
+  }
+  if (request.paymentStatus !== 'paid') {
+    throw new Error('Payment must be confirmed first');
+  }
+  if (request.status !== 'awaiting_confirmation') {
+    throw new Error('Provider has not marked this service as completed yet');
+  }
+
+  await db
+    .update(serviceRequests)
+    .set({
+      status: 'completed',
+      customerConfirmedAt: new Date(),
+      payoutStatus: 'ready_for_payout',
+      updatedAt: new Date(),
+    })
+    .where(eq(serviceRequests.id, requestId));
 
   revalidatePath('/dashboard/marketplace');
 }
