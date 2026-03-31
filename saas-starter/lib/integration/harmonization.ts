@@ -70,7 +70,7 @@ export const HARMONIZATION_STEPS: HarmonizationStep[] = [
     ],
     status: 'partial',
     implementationHint:
-      'Slices: /dashboard/hub/slices/*; list data: /dashboard/hub/data/* (INTEGRATION_*_LIST_PATH). Local logistics proof: pnpm mock:logistics + INTEGRATION_LOGISTICS_URL=http://localhost:4100 → health + gateway list.'
+      'Slices: /dashboard/hub/slices/*; list data: /dashboard/hub/data/* (INTEGRATION_*_LIST_PATH). Local logistics + gig: pnpm mock:domains (or mock:logistics / mock:gig) + INTEGRATION_*_URL on 4100/4200 → health + gateway.'
   },
   {
     step: 6,
@@ -81,7 +81,7 @@ export const HARMONIZATION_STEPS: HarmonizationStep[] = [
     ],
     status: 'partial',
     implementationHint:
-      'Retail slice: /dashboard/hub/slices/retail; webhooks with teamId (or X-IbaHub-Team-Id) persist to team activity; disable with INTEGRATION_WEBHOOK_PERSIST_ACTIVITY=false.'
+      'Retail slice: /dashboard/hub/slices/retail; webhooks with teamId (or X-IbaHub-Team-Id) persist to team activity; disable with INTEGRATION_WEBHOOK_PERSIST_ACTIVITY=false. Local catalog mock: pnpm mock:retail + INTEGRATION_RETAIL_URL=http://localhost:4300 → /dashboard/hub/data/retail.'
   },
   {
     step: 7,

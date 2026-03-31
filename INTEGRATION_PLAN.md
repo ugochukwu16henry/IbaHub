@@ -89,7 +89,7 @@ The **saas-starter** app is the unified shell. In-dashboard views mirror this do
 | §3.2 API gateway | — | `/api/gateway/[service]/…`, session + tenant headers |
 | §3.2 boundaries & contracts | roadmap page + API | `lib/integration/boundaries.ts`, `contracts/openapi/*.yaml`, `GET /api/integration/contracts`, `GET /api/integration/openapi/[service]` |
 | §3.3 identity / tenants / SSO | `/dashboard/hub/tenants`, `/api/auth/sso/*` | `teams.integration_mappings`; OIDC + PKCE; `users.oauth_provider`, `users.oauth_sub` |
-| §3.5–3.6 domain lists | `/dashboard/hub/data` | `INTEGRATION_*_LIST_PATH`, `lib/integration/domain-data.ts`; local logistics smoke: `pnpm mock:logistics` → `INTEGRATION_LOGISTICS_URL=http://localhost:4100` |
+| §3.5–3.6 domain lists | `/dashboard/hub/data` | `INTEGRATION_*_LIST_PATH`, `lib/integration/domain-data.ts`; local mocks: `pnpm mock:domains` (or `mock:logistics` / `mock:gig` / `mock:retail`) → ports 4100 / 4200 / 4300 |
 | §3.7 fintech / payouts | `/dashboard/hub/payments` | `lib/integration/payments-bridge.ts`; `POST /api/webhooks/payments/domain` |
 | §3.8 security headers | — | `next.config.ts` `headers` (incl. CSP); `e2e/security-headers.spec.ts`, `e2e/integration-shell.spec.ts`; webhook rate limit + `Idempotency-Key` → `webhook_inbox` |
 | Cross-service → activity | `/dashboard/activity` | Webhooks with `teamId` / `X-IbaHub-Team-Id`; `lib/integration/webhook-persist.ts`; team-scoped log |
