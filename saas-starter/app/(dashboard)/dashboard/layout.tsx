@@ -49,6 +49,12 @@ export default function DashboardLayout({
     if (href === '/dashboard/marketplace') {
       return pathname.startsWith('/dashboard/marketplace');
     }
+    if (href === '/dashboard/rides/book') {
+      return pathname.startsWith('/dashboard/rides/book');
+    }
+    if (href === '/dashboard/rides/rider') {
+      return pathname.startsWith('/dashboard/rides/rider');
+    }
     if (href === '/dashboard/hub') {
       return (
         pathname.startsWith('/dashboard/hub') &&
@@ -73,6 +79,8 @@ export default function DashboardLayout({
     { href: '/dashboard/hub/tenants', icon: Link2, label: 'Tenant mappings' },
     { href: '/dashboard', icon: Users, label: 'Organization' },
     { href: '/dashboard/marketplace', icon: Users, label: 'Marketplace' },
+    { href: '/dashboard/rides/book', icon: Bike, label: 'Book ride' },
+    { href: '/dashboard/rides/rider', icon: Bike, label: 'Rider console' },
     { href: '/dashboard/general', icon: Settings, label: 'General' },
     { href: '/dashboard/activity', icon: Activity, label: 'Activity' },
     { href: '/dashboard/security', icon: Shield, label: 'Security' }

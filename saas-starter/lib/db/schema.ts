@@ -77,6 +77,9 @@ export const riderProfiles = pgTable(
     availabilityStatus: varchar('availability_status', { length: 20 })
       .notNull()
       .default('offline'),
+    photoUrl: text('photo_url'),
+    avgRating: integer('avg_rating').notNull().default(0),
+    ratingCount: integer('rating_count').notNull().default(0),
     kycNotes: text('kyc_notes'),
     createdAt: timestamp('created_at').notNull().defaultNow(),
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
@@ -207,6 +210,98 @@ export const serviceReviews = pgTable(
   })
 );
 
+export const riderLocations = pgTable(
+  'rider_locations',
+  {
+    id: serial('id').primaryKey(),
+    riderProfileId: integer('rider_profile_id')
+      .notNull()
+      .references(() => riderProfiles.id),
+    lat: integer('lat').notNull(),
+    lng: integer('lng').notNull(),
+    heading: integer('heading'),
+    isOnline: boolean('is_online').notNull().default(false),
+    lastSeenAt: timestamp('last_seen_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => ({
+    riderLocationUnique: uniqueIndex('rider_locations_rider_profile_unique').on(
+      t.riderProfileId
+    ),
+  })
+);
+
+export const riderBookings = pgTable('rider_bookings', {
+  id: serial('id').primaryKey(),
+  customerUserId: integer('customer_user_id')
+    .notNull()
+    .references(() => users.id),
+  riderProfileId: integer('rider_profile_id').references(() => riderProfiles.id),
+  pickupLabel: varchar('pickup_label', { length: 160 }).notNull(),
+  dropoffLabel: varchar('dropoff_label', { length: 160 }).notNull(),
+  pickupLat: integer('pickup_lat').notNull(),
+  pickupLng: integer('pickup_lng').notNull(),
+  dropoffLat: integer('dropoff_lat').notNull(),
+  dropoffLng: integer('dropoff_lng').notNull(),
+  quotedFareKobo: integer('quoted_fare_kobo').notNull(),
+  grossAmountKobo: integer('gross_amount_kobo').notNull(),
+  platformFeeKobo: integer('platform_fee_kobo').notNull(),
+  riderNetKobo: integer('rider_net_kobo').notNull(),
+  paystackReference: varchar('paystack_reference', { length: 120 }),
+  paymentStatus: varchar('payment_status', { length: 20 })
+    .notNull()
+    .default('unpaid'),
+  bookingStatus: varchar('booking_status', { length: 30 })
+    .notNull()
+    .default('requested'),
+  paidAt: timestamp('paid_at'),
+  riderAcceptedAt: timestamp('rider_accepted_at'),
+  riderStartedAt: timestamp('rider_started_at'),
+  riderCompletedAt: timestamp('rider_completed_at'),
+  customerConfirmedAt: timestamp('customer_confirmed_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const riderReviews = pgTable(
+  'rider_reviews',
+  {
+    id: serial('id').primaryKey(),
+    bookingId: integer('booking_id')
+      .notNull()
+      .references(() => riderBookings.id),
+    customerUserId: integer('customer_user_id')
+      .notNull()
+      .references(() => users.id),
+    riderProfileId: integer('rider_profile_id')
+      .notNull()
+      .references(() => riderProfiles.id),
+    rating: integer('rating').notNull(),
+    comment: text('comment'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => ({
+    riderReviewBookingUnique: uniqueIndex('rider_reviews_booking_unique').on(
+      t.bookingId
+    ),
+  })
+);
+
+export const payoutLedger = pgTable('payout_ledger', {
+  id: serial('id').primaryKey(),
+  bookingId: integer('booking_id')
+    .notNull()
+    .references(() => riderBookings.id),
+  riderProfileId: integer('rider_profile_id')
+    .notNull()
+    .references(() => riderProfiles.id),
+  amountNetKobo: integer('amount_net_kobo').notNull(),
+  status: varchar('status', { length: 30 }).notNull().default('ready_for_payout'),
+  transferReference: varchar('transfer_reference', { length: 120 }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
 export const teamsRelations = relations(teams, ({ many }) => ({
   teamMembers: many(teamMembers),
   activityLogs: many(activityLogs),
@@ -222,6 +317,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   riderProfiles: many(riderProfiles),
   serviceRequests: many(serviceRequests),
   serviceReviews: many(serviceReviews),
+  riderBookings: many(riderBookings),
+  riderReviews: many(riderReviews),
 }));
 
 export const invitationsRelations = relations(invitations, ({ one }) => ({
@@ -261,6 +358,52 @@ export const riderProfilesRelations = relations(riderProfiles, ({ one }) => ({
   user: one(users, {
     fields: [riderProfiles.userId],
     references: [users.id],
+  }),
+}));
+
+export const riderLocationsRelations = relations(riderLocations, ({ one }) => ({
+  riderProfile: one(riderProfiles, {
+    fields: [riderLocations.riderProfileId],
+    references: [riderProfiles.id],
+  }),
+}));
+
+export const riderBookingsRelations = relations(riderBookings, ({ one, many }) => ({
+  customer: one(users, {
+    fields: [riderBookings.customerUserId],
+    references: [users.id],
+  }),
+  rider: one(riderProfiles, {
+    fields: [riderBookings.riderProfileId],
+    references: [riderProfiles.id],
+  }),
+  reviews: many(riderReviews),
+  payouts: many(payoutLedger),
+}));
+
+export const riderReviewsRelations = relations(riderReviews, ({ one }) => ({
+  booking: one(riderBookings, {
+    fields: [riderReviews.bookingId],
+    references: [riderBookings.id],
+  }),
+  customer: one(users, {
+    fields: [riderReviews.customerUserId],
+    references: [users.id],
+  }),
+  rider: one(riderProfiles, {
+    fields: [riderReviews.riderProfileId],
+    references: [riderProfiles.id],
+  }),
+}));
+
+export const payoutLedgerRelations = relations(payoutLedger, ({ one }) => ({
+  booking: one(riderBookings, {
+    fields: [payoutLedger.bookingId],
+    references: [riderBookings.id],
+  }),
+  rider: one(riderProfiles, {
+    fields: [payoutLedger.riderProfileId],
+    references: [riderProfiles.id],
   }),
 }));
 
@@ -319,6 +462,14 @@ export type ActivityLog = typeof activityLogs.$inferSelect;
 export type NewActivityLog = typeof activityLogs.$inferInsert;
 export type RiderProfile = typeof riderProfiles.$inferSelect;
 export type NewRiderProfile = typeof riderProfiles.$inferInsert;
+export type RiderLocation = typeof riderLocations.$inferSelect;
+export type NewRiderLocation = typeof riderLocations.$inferInsert;
+export type RiderBooking = typeof riderBookings.$inferSelect;
+export type NewRiderBooking = typeof riderBookings.$inferInsert;
+export type RiderReview = typeof riderReviews.$inferSelect;
+export type NewRiderReview = typeof riderReviews.$inferInsert;
+export type PayoutLedger = typeof payoutLedger.$inferSelect;
+export type NewPayoutLedger = typeof payoutLedger.$inferInsert;
 export type WebhookInbox = typeof webhookInbox.$inferSelect;
 export type NewWebhookInbox = typeof webhookInbox.$inferInsert;
 export type Invitation = typeof invitations.$inferSelect;

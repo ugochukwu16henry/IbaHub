@@ -1,7 +1,7 @@
 import { eq, and } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db/drizzle';
-import { serviceRequests } from '@/lib/db/schema';
+import { riderBookings, serviceRequests } from '@/lib/db/schema';
 import { verifyPaystackSignature } from '@/lib/payments/paystack-marketplace';
 
 type PaystackChargeEvent = {
@@ -11,7 +11,9 @@ type PaystackChargeEvent = {
     reference?: string;
     amount?: number;
     metadata?: {
+      kind?: string;
       serviceRequestId?: number;
+      riderBookingId?: number;
       [key: string]: unknown;
     };
   };
@@ -38,9 +40,50 @@ export async function POST(request: NextRequest) {
 
   const reference = payload.data?.reference;
   const amount = payload.data?.amount;
+  const kind = payload.data?.metadata?.kind;
   const serviceRequestId = payload.data?.metadata?.serviceRequestId;
-  if (!reference || !amount || !serviceRequestId) {
+  const riderBookingId = payload.data?.metadata?.riderBookingId;
+  if (!reference || !amount) {
     return NextResponse.json({ error: 'Missing required payment metadata' }, { status: 400 });
+  }
+
+  if (kind === 'rider_booking' && riderBookingId) {
+    const [booking] = await db
+      .select()
+      .from(riderBookings)
+      .where(eq(riderBookings.id, Number(riderBookingId)))
+      .limit(1);
+
+    if (!booking) {
+      return NextResponse.json({ error: 'Rider booking not found' }, { status: 404 });
+    }
+    if (booking.paymentStatus === 'paid') {
+      return NextResponse.json({ ok: true, alreadyProcessed: true });
+    }
+    if (booking.grossAmountKobo !== amount) {
+      return NextResponse.json({ error: 'Amount mismatch' }, { status: 400 });
+    }
+
+    await db
+      .update(riderBookings)
+      .set({
+        paymentStatus: 'paid',
+        paidAt: new Date(),
+        paystackReference: reference,
+        updatedAt: new Date()
+      })
+      .where(
+        and(
+          eq(riderBookings.id, Number(riderBookingId)),
+          eq(riderBookings.paymentStatus, 'unpaid')
+        )
+      );
+
+    return NextResponse.json({ ok: true });
+  }
+
+  if (!serviceRequestId) {
+    return NextResponse.json({ error: 'Unknown payment metadata kind' }, { status: 400 });
   }
 
   const [requestRow] = await db

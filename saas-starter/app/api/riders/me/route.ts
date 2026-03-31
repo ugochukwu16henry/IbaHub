@@ -2,7 +2,8 @@ import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '@/lib/db/drizzle';
 import { getUser } from '@/lib/db/queries';
-import { riderProfiles } from '@/lib/db/schema';
+import { riderLocations, riderProfiles } from '@/lib/db/schema';
+import { toMicroDegrees } from '@/lib/rides/geo';
 
 export const runtime = 'nodejs';
 
@@ -10,7 +11,12 @@ const patchSchema = z.object({
   phone: z.string().max(30).optional(),
   vehicleType: z.string().max(40).optional(),
   serviceZone: z.string().max(100).optional(),
-  availabilityStatus: z.enum(['offline', 'available', 'busy']).optional()
+  availabilityStatus: z.enum(['offline', 'available', 'busy']).optional(),
+  photoUrl: z.string().url().max(2048).optional(),
+  lat: z.number().optional(),
+  lng: z.number().optional(),
+  heading: z.number().optional(),
+  isOnline: z.boolean().optional()
 });
 
 export async function GET() {
@@ -61,6 +67,7 @@ export async function PATCH(request: Request) {
       vehicleType: patch.vehicleType?.trim() ?? undefined,
       serviceZone: patch.serviceZone?.trim() ?? undefined,
       availabilityStatus: patch.availabilityStatus,
+      photoUrl: patch.photoUrl?.trim() ?? undefined,
       updatedAt: new Date()
     })
     .where(and(eq(riderProfiles.userId, user.id)))
@@ -68,6 +75,34 @@ export async function PATCH(request: Request) {
 
   if (!updated) {
     return Response.json({ error: 'Rider profile not found' }, { status: 404 });
+  }
+
+  if (
+    Number.isFinite(patch.lat) &&
+    Number.isFinite(patch.lng)
+  ) {
+    await db
+      .insert(riderLocations)
+      .values({
+        riderProfileId: updated.id,
+        lat: toMicroDegrees(patch.lat as number),
+        lng: toMicroDegrees(patch.lng as number),
+        heading: Number.isFinite(patch.heading) ? Math.round(patch.heading as number) : null,
+        isOnline: patch.isOnline ?? updated.availabilityStatus === 'available',
+        lastSeenAt: new Date(),
+        updatedAt: new Date()
+      })
+      .onConflictDoUpdate({
+        target: riderLocations.riderProfileId,
+        set: {
+          lat: toMicroDegrees(patch.lat as number),
+          lng: toMicroDegrees(patch.lng as number),
+          heading: Number.isFinite(patch.heading) ? Math.round(patch.heading as number) : null,
+          isOnline: patch.isOnline ?? updated.availabilityStatus === 'available',
+          lastSeenAt: new Date(),
+          updatedAt: new Date()
+        }
+      });
   }
 
   return Response.json({ profile: updated });

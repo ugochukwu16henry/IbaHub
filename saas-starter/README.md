@@ -66,6 +66,20 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to see the a
 
 Use your Paystack test keys and test cards in the Paystack dashboard to validate charge/authorization behavior in your environment.
 
+## Rider Marketplace + Dispatch
+
+- Customer flow: choose nearest rider, pay upfront via Paystack, track status, confirm completion, then rate rider.
+- Rider flow: go online, receive requests, start ride only after payment, mark done.
+- Platform commission: 5% per rider booking (computed server-side).
+- Payout readiness: after customer confirmation, booking is marked ready for payout ledger processing.
+- Core endpoints:
+  - `GET /api/rides/nearest?pickupLat=..&pickupLng=..`
+  - `POST /api/rides/bookings`
+  - `POST /api/rides/bookings/:bookingId/pay`
+  - `PATCH /api/rides/bookings/:bookingId/status`
+  - `POST /api/rides/bookings/:bookingId/review`
+  - `POST /api/webhooks/paystack`
+
 - Card Number: `4242 4242 4242 4242`
 - Expiration: Any future date
 - CVC: Any 3-digit number
@@ -77,7 +91,7 @@ When you're ready to deploy your SaaS application to production, follow these st
 ### Set up a production Paystack webhook
 
 1. Go to the Paystack Dashboard and create a new webhook for your production environment.
-2. Set the endpoint URL to your production API route (for example, your payments webhook endpoint).
+2. Set the endpoint URL to your production API route (recommended: `https://yourdomain.com/api/webhooks/paystack`).
 3. Select the events you want to listen for (for example, charge and subscription lifecycle events).
 
 ### Deploy to Vercel
