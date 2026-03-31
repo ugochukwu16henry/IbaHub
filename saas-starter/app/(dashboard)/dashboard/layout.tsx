@@ -11,7 +11,9 @@ import {
   Activity,
   Menu,
   LayoutGrid,
-  Link2
+  Link2,
+  ListOrdered,
+  ClipboardCheck
 } from 'lucide-react';
 
 export default function DashboardLayout({
@@ -26,10 +28,18 @@ export default function DashboardLayout({
     if (href === '/dashboard/hub/tenants') {
       return pathname.startsWith('/dashboard/hub/tenants');
     }
+    if (href === '/dashboard/hub/roadmap') {
+      return pathname.startsWith('/dashboard/hub/roadmap');
+    }
+    if (href === '/dashboard/hub/audit') {
+      return pathname.startsWith('/dashboard/hub/audit');
+    }
     if (href === '/dashboard/hub') {
       return (
         pathname.startsWith('/dashboard/hub') &&
-        !pathname.startsWith('/dashboard/hub/tenants')
+        !pathname.startsWith('/dashboard/hub/tenants') &&
+        !pathname.startsWith('/dashboard/hub/roadmap') &&
+        !pathname.startsWith('/dashboard/hub/audit')
       );
     }
     return pathname === href;
@@ -37,6 +47,8 @@ export default function DashboardLayout({
 
   const navItems = [
     { href: '/dashboard/hub', icon: LayoutGrid, label: 'Integration hub' },
+    { href: '/dashboard/hub/roadmap', icon: ListOrdered, label: 'Plan roadmap' },
+    { href: '/dashboard/hub/audit', icon: ClipboardCheck, label: 'Repo audit' },
     { href: '/dashboard/hub/tenants', icon: Link2, label: 'Tenant mappings' },
     { href: '/dashboard', icon: Users, label: 'Team' },
     { href: '/dashboard/general', icon: Settings, label: 'General' },

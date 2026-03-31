@@ -9,7 +9,15 @@ import {
 import { Button } from '@/components/ui/button';
 import { IntegrationHubHealth } from '@/components/integration/hub-health';
 import { getIntegrationHubSummary, INTEGRATION_SERVICES } from '@/lib/integration/services';
-import { ArrowRight, CheckCircle2, CircleDashed, CreditCard, Webhook } from 'lucide-react';
+import {
+  ArrowRight,
+  CheckCircle2,
+  CircleDashed,
+  CreditCard,
+  Webhook,
+  ListOrdered,
+  ClipboardCheck
+} from 'lucide-react';
 
 export default function IntegrationHubPage() {
   const services = getIntegrationHubSummary();
@@ -21,21 +29,35 @@ export default function IntegrationHubPage() {
   return (
     <section className="flex-1 p-4 lg:p-8 max-w-4xl">
       <h1 className="text-lg lg:text-2xl font-medium mb-2">Integration hub</h1>
-      <p className="text-sm text-muted-foreground mb-6 max-w-2xl">
-        Modular domains from the IbaHub plan. Configure upstream API base URLs
-        in environment variables, then call them through the authenticated
-        gateway under{' '}
+      <p className="text-sm text-muted-foreground mb-4 max-w-2xl">
+        Execution layer for <strong className="text-foreground">INTEGRATION_PLAN.md</strong> (§2
+        architecture, §3 harmonization, §5 domain matrix). Configure upstream
+        API base URLs, then call the authenticated gateway at{' '}
         <code className="text-xs bg-gray-100 px-1 rounded">
           /api/gateway/&lt;service&gt;/…
         </code>
-        . The gateway adds <code className="text-xs bg-gray-100 px-1 rounded">X-IbaHub-User-Id</code>,{' '}
+        . Headers include <code className="text-xs bg-gray-100 px-1 rounded">X-IbaHub-User-Id</code>,{' '}
         <code className="text-xs bg-gray-100 px-1 rounded">X-IbaHub-Team-Id</code>, and optional org
-        headers from{' '}
+        IDs from{' '}
         <Link href="/dashboard/hub/tenants" className="underline">
           tenant mappings
         </Link>
         .
       </p>
+      <div className="flex flex-wrap gap-2 mb-8">
+        <Button variant="outline" size="sm" asChild>
+          <Link href="/dashboard/hub/roadmap">
+            <ListOrdered className="size-3.5 mr-1" />
+            §3 Roadmap &amp; §5 matrix
+          </Link>
+        </Button>
+        <Button variant="outline" size="sm" asChild>
+          <Link href="/dashboard/hub/audit">
+            <ClipboardCheck className="size-3.5 mr-1" />
+            §6.1 Repo audit
+          </Link>
+        </Button>
+      </div>
 
       <IntegrationHubHealth items={healthItems} />
 
@@ -122,7 +144,11 @@ export default function IntegrationHubPage() {
                   </span>
                 </div>
                 <CardDescription>{s.description}</CardDescription>
-                <p className="text-xs text-muted-foreground font-mono pt-1">
+                <p className="text-xs text-muted-foreground pt-1">
+                  Plan: {s.planRefs.join(', ')} · Repos:{' '}
+                  <span className="font-mono">{s.sourceRepos.join(', ')}</span>
+                </p>
+                <p className="text-xs text-muted-foreground font-mono pt-0.5">
                   {s.envKey}
                 </p>
               </CardHeader>

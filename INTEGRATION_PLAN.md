@@ -76,3 +76,20 @@
 3. Set up the unified Next.js PWA shell
 4. Incrementally integrate each domain as a service/module
 5. Test, iterate, and refine UX and cross-service flows
+
+## 7. Implementation alignment (living status)
+
+The **saas-starter** app is the unified shell. In-dashboard views mirror this document:
+
+| Plan section | In-app route | Code / notes |
+| ------------ | ------------ | -------------- |
+| §3 steps 1–8 | `/dashboard/hub/roadmap` | `lib/integration/harmonization.ts` |
+| §5 domain matrix | same roadmap page (table) | `lib/integration/domain-matrix.ts` |
+| §6.1 repo audit | `/dashboard/hub/audit` | `lib/integration/repo-audit.ts` |
+| §3.2 API gateway | — | `/api/gateway/[service]/…`, session + tenant headers |
+| §3.3 identity / tenants | `/dashboard/hub/tenants` | `teams.integration_mappings` |
+| §3.4 modular UI | `/dashboard/hub`, `/dashboard/hub/slices/…` | Vertical slices per domain |
+| §4 Docker / API-first | — | Run upstream repos with their own Docker; shell connects via `INTEGRATION_*_URL` |
+
+**Source of truth:** this file at the repository root. Update §7 or the linked TypeScript modules when milestones change.
+
