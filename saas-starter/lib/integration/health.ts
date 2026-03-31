@@ -1,7 +1,5 @@
-import {
-  getIntegrationBaseUrl,
-  type IntegrationServiceId
-} from '@/lib/integration/services';
+import { getValidatedIntegrationBaseUrl } from '@/lib/integration/boundaries';
+import type { IntegrationServiceId } from '@/lib/integration/services';
 
 const DEFAULT_HEALTH_PATH = '/health';
 const TIMEOUT_MS = 4000;
@@ -30,16 +28,30 @@ export type IntegrationHealthResult = {
 export async function checkIntegrationHealth(
   serviceId: IntegrationServiceId
 ): Promise<IntegrationHealthResult> {
-  const base = getIntegrationBaseUrl(serviceId);
-  if (!base) {
+  const validated = getValidatedIntegrationBaseUrl(serviceId);
+  if (!validated.ok) {
+    if (validated.reason === 'not_configured') {
+      return {
+        id: serviceId,
+        configured: false,
+        ok: false,
+        latencyMs: 0
+      };
+    }
+    const msg =
+      validated.reason === 'host_not_allowed'
+        ? 'Hostname not in INTEGRATION_*_ALLOWED_HOSTS'
+        : 'Invalid upstream URL';
     return {
       id: serviceId,
-      configured: false,
+      configured: true,
       ok: false,
-      latencyMs: 0
+      latencyMs: 0,
+      error: msg
     };
   }
 
+  const base = validated.base;
   const path = healthPathFor(serviceId);
   const url = `${base}${path}`;
   const started = performance.now();

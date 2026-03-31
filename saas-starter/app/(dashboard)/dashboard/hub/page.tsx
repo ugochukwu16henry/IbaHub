@@ -57,6 +57,9 @@ export default function IntegrationHubPage() {
             §6.1 Repo audit
           </Link>
         </Button>
+        <Button variant="outline" size="sm" asChild>
+          <Link href="/dashboard/hub/data">Domain data (§3.5–3.6)</Link>
+        </Button>
       </div>
 
       <IntegrationHubHealth items={healthItems} />

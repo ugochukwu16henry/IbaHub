@@ -1,0 +1,25 @@
+openapi: 3.0.3
+info:
+  title: IbaHub Retail / inventory service boundary
+  version: 0.1.0
+  description: |
+    Stub contract for QUANTUM-STASH inventory and POS.
+    Replace with real OpenAPI export from that app when available.
+servers:
+  - url: '{INTEGRATION_RETAIL_URL}'
+    description: Set in environment; gateway uses /api/gateway/retail/…
+paths:
+  /health:
+    get:
+      summary: Health probe
+      operationId: retailHealth
+      responses:
+        '200':
+          description: Service reachable
+  /api/products:
+    get:
+      summary: Example product list (template)
+      operationId: retailProductsList
+      responses:
+        '200':
+          description: OK

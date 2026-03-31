@@ -10,15 +10,33 @@ import { CircleIcon, Loader2 } from 'lucide-react';
 import { signIn, signUp } from './actions';
 import { ActionState } from '@/lib/auth/middleware';
 
+const OAUTH_ERROR_HINT: Record<string, string> = {
+  oauth_state: 'SSO session expired or invalid. Try again.',
+  oauth_account_conflict: 'This email is already linked to another SSO identity.',
+  oauth_token: 'Could not exchange SSO code. Check client credentials.',
+  oauth_jwt: 'SSO identity token could not be verified.',
+  oauth_no_email: 'Your IdP did not return an email claim.',
+  oauth_email_unverified: 'Email must be verified with your IdP.',
+  oauth_no_sub: 'Your IdP did not return a subject (sub) claim.',
+  oauth_no_id_token: 'No ID token from IdP.',
+  oauth_create_failed: 'Could not create account.',
+  oauth_team_failed: 'Could not create team.',
+  sso_disabled: 'SSO is not configured on the server.'
+};
+
 export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
   const priceId = searchParams.get('priceId');
   const inviteId = searchParams.get('inviteId');
+  const urlError = searchParams.get('error');
+  const ssoEnabled = process.env.NEXT_PUBLIC_AUTH_SSO_ENABLED === 'true';
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     mode === 'signin' ? signIn : signUp,
     { error: '' }
   );
+
+  const oauthHint = urlError ? OAUTH_ERROR_HINT[urlError] ?? urlError : null;
 
   return (
     <div className="min-h-[100dvh] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
@@ -34,6 +52,24 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        {ssoEnabled ? (
+          <div className="mb-6">
+            <a
+              href="/api/auth/sso/start"
+              className="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-full shadow-sm text-sm font-medium text-gray-800 bg-white hover:bg-gray-50"
+            >
+              Continue with SSO (OIDC)
+            </a>
+            <p className="mt-2 text-xs text-center text-gray-500">
+              OpenID Connect (PKCE). Configure AUTH_SSO_* in env.
+            </p>
+          </div>
+        ) : null}
+
+        {oauthHint ? (
+          <div className="mb-4 text-sm text-red-600">{oauthHint}</div>
+        ) : null}
+
         <form className="space-y-6" action={formAction}>
           <input type="hidden" name="redirect" value={redirect || ''} />
           <input type="hidden" name="priceId" value={priceId || ''} />

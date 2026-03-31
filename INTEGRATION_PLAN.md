@@ -87,7 +87,9 @@ The **saas-starter** app is the unified shell. In-dashboard views mirror this do
 | §5 domain matrix | same roadmap page (table) | `lib/integration/domain-matrix.ts` |
 | §6.1 repo audit | `/dashboard/hub/audit` | `lib/integration/repo-audit.ts` |
 | §3.2 API gateway | — | `/api/gateway/[service]/…`, session + tenant headers |
-| §3.3 identity / tenants | `/dashboard/hub/tenants` | `teams.integration_mappings` |
+| §3.2 boundaries & contracts | roadmap page + API | `lib/integration/boundaries.ts`, `contracts/openapi/*.yaml`, `GET /api/integration/contracts`, `GET /api/integration/openapi/[service]` |
+| §3.3 identity / tenants / SSO | `/dashboard/hub/tenants`, `/api/auth/sso/*` | `teams.integration_mappings`; OIDC + PKCE; `users.oauth_provider`, `users.oauth_sub` |
+| §3.5–3.6 domain lists | `/dashboard/hub/data` | `INTEGRATION_*_LIST_PATH`, `lib/integration/domain-data.ts` |
 | §3.4 modular UI | `/dashboard/hub`, `/dashboard/hub/slices/…` | Vertical slices per domain |
 | §4 Docker / API-first | — | Run upstream repos with their own Docker; shell connects via `INTEGRATION_*_URL` |
 

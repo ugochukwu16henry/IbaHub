@@ -1,0 +1,25 @@
+openapi: 3.0.3
+info:
+  title: IbaHub Gig / on-demand service boundary
+  version: 0.1.0
+  description: |
+    Stub contract for ride-hailing / gig (libretaxi, Uber-Clone).
+    Replace when backend HTTP surface is fixed.
+servers:
+  - url: '{INTEGRATION_GIG_URL}'
+    description: Set in environment; gateway uses /api/gateway/gig/…
+paths:
+  /health:
+    get:
+      summary: Health probe
+      operationId: gigHealth
+      responses:
+        '200':
+          description: Service reachable
+  /v1/rides:
+    get:
+      summary: Example rides list (template)
+      operationId: gigRidesList
+      responses:
+        '200':
+          description: OK

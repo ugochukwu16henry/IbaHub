@@ -11,12 +11,9 @@ import {
   INTEGRATION_ROUTE_TEMPLATES,
   integrationGatewayPath
 } from '@/lib/integration/contracts';
+import { getValidatedIntegrationBaseUrl } from '@/lib/integration/boundaries';
 import { gatewayFetch } from '@/lib/integration/server-gateway';
-import {
-  getIntegrationBaseUrl,
-  INTEGRATION_SERVICES,
-  type IntegrationServiceId
-} from '@/lib/integration/services';
+import { INTEGRATION_SERVICES, type IntegrationServiceId } from '@/lib/integration/services';
 import { ArrowLeft } from 'lucide-react';
 
 const SLICE_COPY: Record<
@@ -47,7 +44,7 @@ export async function IntegrationVerticalSlice({
 }) {
   const copy = SLICE_COPY[service];
   const envKey = INTEGRATION_SERVICES.find((s) => s.id === service)!.envKey;
-  const base = getIntegrationBaseUrl(service);
+  const validated = getValidatedIntegrationBaseUrl(service);
   const healthSegments = [...INTEGRATION_ROUTE_TEMPLATES[service].health];
   const healthPath = healthSegments.join('/');
 
@@ -55,9 +52,16 @@ export async function IntegrationVerticalSlice({
   let preview: string;
   let error: string | undefined;
 
-  if (!base) {
+  if (!validated.ok) {
     preview = '';
-    error = `Set ${envKey} in .env, then run health checks from the integration hub.`;
+    if (validated.reason === 'not_configured') {
+      error = `Set ${envKey} in .env, then run health checks from the integration hub.`;
+    } else if (validated.reason === 'host_not_allowed') {
+      error =
+        'Upstream hostname is not in INTEGRATION_*_ALLOWED_HOSTS for this service.';
+    } else {
+      error = 'Invalid INTEGRATION_*_URL.';
+    }
   } else {
     try {
       const res = await gatewayFetch(service, healthPath);

@@ -2,10 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/session';
 import { getTeamForUser } from '@/lib/db/queries';
 import { parseIntegrationMappings } from '@/lib/integration/mappings';
-import {
-  getIntegrationBaseUrl,
-  type IntegrationServiceId
-} from '@/lib/integration/services';
+import { getValidatedIntegrationBaseUrl } from '@/lib/integration/boundaries';
+import type { IntegrationServiceId } from '@/lib/integration/services';
 
 export const runtime = 'nodejs';
 
@@ -37,13 +35,26 @@ async function proxy(
     return NextResponse.json({ error: 'Unknown service' }, { status: 404 });
   }
 
-  const base = getIntegrationBaseUrl(service);
-  if (!base) {
+  const validated = getValidatedIntegrationBaseUrl(service);
+  if (!validated.ok) {
+    if (validated.reason === 'not_configured') {
+      return NextResponse.json(
+        { error: 'Service not configured', service },
+        { status: 503 }
+      );
+    }
     return NextResponse.json(
-      { error: 'Service not configured', service },
+      {
+        error:
+          validated.reason === 'host_not_allowed'
+            ? 'Upstream hostname not allowed (check INTEGRATION_*_ALLOWED_HOSTS)'
+            : 'Invalid upstream base URL',
+        service
+      },
       { status: 503 }
     );
   }
+  const base = validated.base;
 
   const suffix = pathSegments?.length ? pathSegments.join('/') : '';
   const target = `${base}/${suffix}${request.nextUrl.search}`;

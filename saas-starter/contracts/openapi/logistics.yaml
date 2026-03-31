@@ -1,0 +1,25 @@
+openapi: 3.0.3
+info:
+  title: IbaHub Logistics service boundary
+  version: 0.1.0
+  description: |
+    Stub contract for the logistics domain (fleetbase, Mover).
+    Replace paths and schemas when fleetbase APIs are versioned here.
+servers:
+  - url: '{INTEGRATION_LOGISTICS_URL}'
+    description: Set in environment; gateway uses /api/gateway/logistics/…
+paths:
+  /health:
+    get:
+      summary: Health probe
+      operationId: logisticsHealth
+      responses:
+        '200':
+          description: Service reachable
+  /v1/orders:
+    get:
+      summary: Example dispatch list (template)
+      operationId: logisticsOrdersList
+      responses:
+        '200':
+          description: OK

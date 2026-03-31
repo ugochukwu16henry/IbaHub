@@ -35,7 +35,7 @@ export const HARMONIZATION_STEPS: HarmonizationStep[] = [
     ],
     status: 'partial',
     implementationHint:
-      'Gateway: /api/gateway/[service]/…; contracts: lib/integration/contracts.ts; upstreams via INTEGRATION_*_URL.'
+      'Gateway: /api/gateway/[service]/…; route templates: lib/integration/contracts.ts; optional hostname allowlists: lib/integration/boundaries.ts; OpenAPI stubs: contracts/openapi/*.yaml; discovery: GET /api/integration/contracts, GET /api/integration/openapi/[service].'
   },
   {
     step: 3,
@@ -46,7 +46,7 @@ export const HARMONIZATION_STEPS: HarmonizationStep[] = [
     ],
     status: 'partial',
     implementationHint:
-      'Users/teams in Postgres; tenant mapping: /dashboard/hub/tenants; SSO not yet implemented.'
+      'Users/teams in Postgres; tenant mapping: /dashboard/hub/tenants; OIDC SSO (PKCE): /api/auth/sso/start → callback, users.oauth_* columns; enable with AUTH_SSO_* and NEXT_PUBLIC_AUTH_SSO_ENABLED=true.'
   },
   {
     step: 4,
@@ -58,7 +58,7 @@ export const HARMONIZATION_STEPS: HarmonizationStep[] = [
     ],
     status: 'partial',
     implementationHint:
-      'Modular hub routes and vertical slices under /dashboard/hub; embed or iframe other UIs later.'
+      'Modular hub routes, vertical slices under /dashboard/hub/slices/*, domain list endpoints under /dashboard/hub/data/*; embed or iframe other UIs later.'
   },
   {
     step: 5,
@@ -70,7 +70,7 @@ export const HARMONIZATION_STEPS: HarmonizationStep[] = [
     ],
     status: 'partial',
     implementationHint:
-      'Logistics & gig slices: /dashboard/hub/slices/logistics, …/gig; wire real fleetbase/libretaxi URLs.'
+      'Slices: /dashboard/hub/slices/*; list data: /dashboard/hub/data/* (INTEGRATION_*_LIST_PATH); wire real fleetbase / gig URLs.'
   },
   {
     step: 6,

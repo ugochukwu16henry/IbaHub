@@ -15,6 +15,13 @@
       "when": 1743369600000,
       "tag": "0001_team_integration_mappings",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1743370000000,
+      "tag": "0002_users_oauth",
+      "breakpoints": true
     }
   ]
 }

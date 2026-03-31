@@ -49,13 +49,38 @@ export default function PlanRoadmapPage() {
       <h1 className="text-lg lg:text-2xl font-medium mb-2">
         Harmonization roadmap
       </h1>
-      <p className="text-sm text-muted-foreground mb-6 max-w-2xl">
+      <p className="text-sm text-muted-foreground mb-4 max-w-2xl">
         This page tracks{' '}
         <strong className="text-foreground">INTEGRATION_PLAN.md</strong> §3
         (steps 1–8) and §5 (domain matrix). Source of truth remains the markdown
         file at the IbaHub repository root; status here is maintained alongside
         code.
       </p>
+
+      <Card className="mb-8">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">§3.2 Service boundaries &amp; API contracts</CardTitle>
+          <CardDescription>
+            Stubs live under <code className="text-xs">contracts/openapi/</code>.
+            Discovery endpoints require a signed-in session.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="text-sm space-y-2 font-mono text-xs">
+          <p>
+            <span className="text-muted-foreground font-sans text-sm">Manifest:</span>{' '}
+            GET /api/integration/contracts
+          </p>
+          <p>
+            <span className="text-muted-foreground font-sans text-sm">OpenAPI (YAML):</span>{' '}
+            GET /api/integration/openapi/logistics | gig | retail
+          </p>
+          <p className="text-muted-foreground font-sans text-sm pt-1">
+            Optional hostname policy: set{' '}
+            <code>INTEGRATION_*_ALLOWED_HOSTS</code> (comma-separated) to restrict
+            <code> INTEGRATION_*_URL</code> hosts.
+          </p>
+        </CardContent>
+      </Card>
 
       <div className="mb-8">
         <Button variant="outline" size="sm" asChild className="mb-6">

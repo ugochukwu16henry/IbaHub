@@ -1,6 +1,7 @@
 import { compare, hash } from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
+import type { NextResponse } from 'next/server';
 import { NewUser } from '@/lib/db/schema';
 
 const key = new TextEncoder().encode(process.env.AUTH_SECRET);
@@ -43,17 +44,34 @@ export async function getSession() {
   return await verifyToken(session);
 }
 
-export async function setSession(user: NewUser) {
+async function buildSessionCookieValue(user: NewUser) {
   const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
   const session: SessionData = {
     user: { id: user.id! },
     expires: expiresInOneDay.toISOString(),
   };
   const encryptedSession = await signToken(session);
+  return { encryptedSession, expiresInOneDay };
+}
+
+export async function setSession(user: NewUser) {
+  const { encryptedSession, expiresInOneDay } = await buildSessionCookieValue(user);
   (await cookies()).set('session', encryptedSession, {
     expires: expiresInOneDay,
     httpOnly: true,
     secure: true,
     sameSite: 'lax',
+  });
+}
+
+/** Use in Route Handlers when returning a redirect Response. */
+export async function setSessionOnResponse(response: NextResponse, user: NewUser) {
+  const { encryptedSession, expiresInOneDay } = await buildSessionCookieValue(user);
+  response.cookies.set('session', encryptedSession, {
+    expires: expiresInOneDay,
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    path: '/',
   });
 }

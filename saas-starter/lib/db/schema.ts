@@ -17,6 +17,8 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   deletedAt: timestamp('deleted_at'),
+  oauthProvider: varchar('oauth_provider', { length: 50 }),
+  oauthSub: varchar('oauth_sub', { length: 255 }),
 });
 
 export const teams = pgTable('teams', {
