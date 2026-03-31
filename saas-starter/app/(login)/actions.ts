@@ -130,7 +130,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   if (existingUser.length > 0) {
     return {
-      error: 'Failed to create user. Please try again.',
+      error: 'An account with this email already exists. Please sign in instead.',
       email,
       password
     };
@@ -144,7 +144,23 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     role: accountType === 'rider' ? 'rider' : 'owner' // Default role, overridden by invitation flow
   };
 
-  const [createdUser] = await db.insert(users).values(newUser).returning();
+  let createdUser: typeof users.$inferSelect | undefined;
+  try {
+    [createdUser] = await db.insert(users).values(newUser).returning();
+  } catch (error) {
+    const code =
+      typeof error === 'object' && error !== null && 'code' in error
+        ? String((error as { code?: unknown }).code)
+        : '';
+    if (code === '23505') {
+      return {
+        error: 'An account with this email already exists. Please sign in instead.',
+        email,
+        password
+      };
+    }
+    throw error;
+  }
 
   if (!createdUser) {
     return {
