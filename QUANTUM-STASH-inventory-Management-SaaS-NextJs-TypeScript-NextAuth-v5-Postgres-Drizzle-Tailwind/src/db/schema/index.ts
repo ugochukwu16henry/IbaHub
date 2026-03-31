@@ -1,3 +1,14 @@
+// ORDERS TABLE
+export const orders = pgTable("order", {
+  id: serial("id").primaryKey(),
+  items: json("items").notNull(), // array of item objects or ids
+  total: decimal("total", { precision: 10, scale: 2 }).notNull(),
+  status: varchar("status", { length: 24 }).notNull().default("pending"),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+})
+
+export type Order = typeof orders.$inferSelect
+export type NewOrder = typeof orders.$inferInsert
 import type { StoredFile } from "@/types"
 import type { AdapterAccount } from "@auth/core/adapters"
 import { relations } from "drizzle-orm"

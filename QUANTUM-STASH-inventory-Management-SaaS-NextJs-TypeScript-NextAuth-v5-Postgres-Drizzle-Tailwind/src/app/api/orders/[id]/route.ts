@@ -1,25 +1,44 @@
-import { NextResponse } from "next/server";
-
-// Example in-memory store (replace with DB logic)
-let orders: any[] = [];
+import { NextResponse } from "next/server"
+import { db } from "@/db"
+import { orders } from "@/db/schema"
+import { eq } from "drizzle-orm"
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
-  const order = orders.find((o) => o.id === params.id);
-  if (!order) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(order);
+  try {
+    const id = Number(params.id)
+    if (!id) return NextResponse.json({ error: "Invalid id" }, { status: 400 })
+    const [order] = await db.select().from(orders).where(eq(orders.id, id))
+    if (!order) return NextResponse.json({ error: "Not found" }, { status: 404 })
+    return NextResponse.json(order)
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to fetch order" }, { status: 500 })
+  }
 }
 
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
-  const idx = orders.findIndex((o) => o.id === params.id);
-  if (idx === -1) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  const data = await req.json();
-  orders[idx] = { ...orders[idx], ...data };
-  return NextResponse.json(orders[idx]);
+  try {
+    const id = Number(params.id)
+    if (!id) return NextResponse.json({ error: "Invalid id" }, { status: 400 })
+    const data = await req.json()
+    const [updated] = await db
+      .update(orders)
+      .set(data)
+      .where(eq(orders.id, id))
+      .returning()
+    if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 })
+    return NextResponse.json(updated)
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to update order" }, { status: 500 })
+  }
 }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-  const idx = orders.findIndex((o) => o.id === params.id);
-  if (idx === -1) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  const deleted = orders.splice(idx, 1)[0];
-  return NextResponse.json(deleted);
+  try {
+    const id = Number(params.id)
+    if (!id) return NextResponse.json({ error: "Invalid id" }, { status: 400 })
+    await db.delete(orders).where(eq(orders.id, id))
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to delete order" }, { status: 500 })
+  }
 }
