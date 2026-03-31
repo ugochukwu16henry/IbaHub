@@ -1,18 +1,33 @@
 import type { NextConfig } from 'next';
 
-/** §3.8 — pragmatic CSP for App Router + Stripe.js; tighten further with nonces if needed. */
-const CONTENT_SECURITY_POLICY = [
-  "default-src 'self'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "frame-ancestors 'none'",
-  "img-src 'self' data: blob: https:",
-  "font-src 'self' data:",
-  "style-src 'self' 'unsafe-inline'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
-  "connect-src 'self' https://api.stripe.com https://m.stripe.network https://*.stripe.com",
-  "frame-src https://js.stripe.com https://hooks.stripe.com"
-].join('; ');
+/** §3.8 — pragmatic CSP for App Router + Stripe.js + optional OIDC SSO. */
+function buildContentSecurityPolicy() {
+  const extraConnect =
+    process.env.AUTH_SSO_CSP_ORIGINS?.split(',')
+      .map((v) => v.trim())
+      .filter(Boolean) ?? [];
+
+  const base = [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    "img-src 'self' data: blob: https:",
+    "font-src 'self' data:",
+    "style-src 'self' 'unsafe-inline'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
+    [
+      "connect-src 'self'",
+      'https://api.stripe.com',
+      'https://m.stripe.network',
+      'https://*.stripe.com',
+      ...extraConnect
+    ].join(' '),
+    "frame-src https://js.stripe.com https://hooks.stripe.com"
+  ];
+
+  return base.join('; ');
+}
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -32,7 +47,7 @@ const nextConfig: NextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(self)'
           },
-          { key: 'Content-Security-Policy', value: CONTENT_SECURITY_POLICY }
+          { key: 'Content-Security-Policy', value: buildContentSecurityPolicy() }
         ]
       }
     ];

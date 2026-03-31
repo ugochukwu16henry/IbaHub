@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { signToken, verifyToken } from '@/lib/auth/session';
+import { getSupabaseUserFromRequest } from '@/lib/auth/supabase';
 
 const protectedRoutes = '/dashboard';
 
@@ -9,6 +10,13 @@ export async function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get('session');
   const isProtectedRoute = pathname.startsWith(protectedRoutes);
 
+  // Prefer Supabase Auth if configured and a Supabase session is present
+  const supabaseUser = await getSupabaseUserFromRequest(request);
+  if (supabaseUser) {
+    return NextResponse.next();
+  }
+
+  // Fallback to legacy session cookie while migration is in progress
   if (isProtectedRoute && !sessionCookie) {
     return NextResponse.redirect(new URL('/sign-in', request.url));
   }
