@@ -7,12 +7,14 @@ export function Terminal() {
   const [terminalStep, setTerminalStep] = useState(0);
   const [copied, setCopied] = useState(false);
   const terminalSteps = [
-    'git clone https://github.com/nextjs/saas-starter',
-    'pnpm install',
-    'pnpm db:setup',
-    'pnpm db:migrate',
-    'pnpm db:seed',
-    'pnpm dev 🎉',
+    'project: IbaHub (IbaPay) — Uyo all-in-one life engine',
+    'mission: digitize Uyo informal economy in one PWA',
+    'gig: students monetize skills (laundry, typing, cleaning)',
+    'logistics: plaza-to-home delivery with trusted riders',
+    'retail: data-light tracker for market shops and merchants',
+    'fintech: dedicated virtual accounts via Paystack/Monnify',
+    'trust: KYC + verification for students and vendors',
+    'platform: mobile-first, offline-capable, low-bandwidth UX',
   ];
 
   useEffect(() => {
