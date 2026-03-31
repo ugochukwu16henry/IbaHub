@@ -33,6 +33,10 @@ export const teams = pgTable('teams', {
   stripeProductId: text('stripe_product_id'),
   planName: varchar('plan_name', { length: 50 }),
   subscriptionStatus: varchar('subscription_status', { length: 20 }),
+  subscriptionRenewsAt: timestamp('subscription_renews_at'),
+  lastPaystackPaymentReference: varchar('last_paystack_payment_reference', {
+    length: 120
+  }),
   /** JSON: logisticsOrgId, gigOrgId, retailOrgId for upstream tenancy */
   integrationMappings: text('integration_mappings'),
 });

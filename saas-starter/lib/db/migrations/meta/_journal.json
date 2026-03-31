@@ -78,6 +78,13 @@
       "when": 1774925000000,
       "tag": "0010_payout_delay_window",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1774930000000,
+      "tag": "0011_team_billing_tracking",
+      "breakpoints": true
     }
   ]
 }

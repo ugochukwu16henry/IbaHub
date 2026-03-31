@@ -84,6 +84,19 @@ Use your Paystack test keys and test cards in the Paystack dashboard to validate
   - `POST /api/rides/bookings/:bookingId/review`
   - `POST /api/webhooks/paystack`
 
+## QUANTUM-STASH retail integration
+
+- Retail owner page: `/dashboard/hub/slices/retail`
+- Required env: `INTEGRATION_RETAIL_URL` (point this to your running QUANTUM-STASH backend).
+- Wired endpoints:
+  - `GET /api/products` or fallback `GET /api/inventory` (list products)
+  - `POST /api/products` (create product)
+  - `PUT /api/inventory/:id` (update quantity/stock)
+- Billing gate: page management actions require active organization subscription.
+- Billing tracking persisted from Paystack subscription webhooks:
+  - `teams.subscription_renews_at`
+  - `teams.last_paystack_payment_reference`
+
 - Card Number: `4242 4242 4242 4242`
 - Expiration: Any future date
 - CVC: Any 3-digit number

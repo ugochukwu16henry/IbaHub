@@ -11,6 +11,8 @@ type PaystackChargeEvent = {
     status?: string;
     reference?: string;
     amount?: number;
+    paid_at?: string;
+    paidAt?: string;
     metadata?: {
       kind?: string;
       serviceRequestId?: number;
@@ -22,6 +24,23 @@ type PaystackChargeEvent = {
     };
   };
 };
+
+function getRenewalDate(
+  paidAtRaw: string | undefined,
+  interval: string | undefined
+): Date {
+  const base = paidAtRaw ? new Date(paidAtRaw) : new Date();
+  const safeBase = Number.isNaN(base.getTime()) ? new Date() : base;
+  const renews = new Date(safeBase);
+
+  if (interval === 'year') {
+    renews.setFullYear(renews.getFullYear() + 1);
+  } else {
+    renews.setMonth(renews.getMonth() + 1);
+  }
+
+  return renews;
+}
 
 export async function POST(request: NextRequest) {
   const rawBody = await request.text();
@@ -116,11 +135,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Team not found' }, { status: 404 });
     }
 
+    const paidAtRaw = payload.data?.paid_at || payload.data?.paidAt;
+    const renewsAt = getRenewalDate(paidAtRaw, selected.price.interval);
+
     await db
       .update(teams)
       .set({
         planName: selected.product.name,
         subscriptionStatus: 'active',
+        subscriptionRenewsAt: renewsAt,
+        lastPaystackPaymentReference: reference,
         updatedAt: new Date()
       })
       .where(eq(teams.id, Number(teamId)));
