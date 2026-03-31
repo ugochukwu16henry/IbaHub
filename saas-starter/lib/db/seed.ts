@@ -1,58 +1,6 @@
-import { stripe } from '../payments/stripe';
 import { db } from './drizzle';
 import { users, teams, teamMembers } from './schema';
 import { hashPassword } from '@/lib/auth/session';
-
-async function createStripeProducts() {
-  const key = process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY;
-  if (!key) {
-    console.log(
-      'Stripe secret key not set; skipping Stripe product/price seed (Paystack-only mode).'
-    );
-    return;
-  }
-
-  if (!stripe) {
-    console.log(
-      'Stripe client not initialized; skipping Stripe product/price seed.'
-    );
-    return;
-  }
-
-  console.log('Creating Stripe products and prices...');
-
-  const baseProduct = await stripe.products.create({
-    name: 'Base',
-    description: 'Base subscription plan',
-  });
-
-  await stripe.prices.create({
-    product: baseProduct.id,
-    unit_amount: 800000, // NGN 8,000 in kobo
-    currency: 'ngn',
-    recurring: {
-      interval: 'month',
-      trial_period_days: 7,
-    },
-  });
-
-  const plusProduct = await stripe.products.create({
-    name: 'Plus',
-    description: 'Plus subscription plan',
-  });
-
-  await stripe.prices.create({
-    product: plusProduct.id,
-    unit_amount: 1200000, // NGN 12,000 in kobo
-    currency: 'ngn',
-    recurring: {
-      interval: 'month',
-      trial_period_days: 7,
-    },
-  });
-
-  console.log('Stripe products and prices created successfully.');
-}
 
 async function seed() {
   const email = 'test@test.com';
@@ -85,7 +33,7 @@ async function seed() {
     role: 'owner',
   });
 
-  await createStripeProducts();
+  console.log('Skipping external billing product seed (Paystack mode).');
 }
 
 seed()
