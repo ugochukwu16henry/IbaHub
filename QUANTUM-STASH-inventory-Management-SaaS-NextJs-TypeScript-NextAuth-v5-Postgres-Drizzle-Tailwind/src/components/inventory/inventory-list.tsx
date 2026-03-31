@@ -9,6 +9,9 @@ export function InventoryList() {
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const [editId, setEditId] = React.useState<number | null>(null)
+  const [search, setSearch] = React.useState("")
+  const [page, setPage] = React.useState(1)
+  const pageSize = 10
 
   const fetchItems = React.useCallback(async () => {
     setLoading(true)
@@ -29,13 +32,42 @@ export function InventoryList() {
     fetchItems()
   }, [fetchItems])
 
+  // Search filter
+  const filtered = items.filter((item) => {
+    const q = search.trim().toLowerCase()
+    if (!q) return true
+    return (
+      (item.name && item.name.toLowerCase().includes(q)) ||
+      (item.sku && item.sku.toLowerCase().includes(q)) ||
+      (item.brand && item.brand.toLowerCase().includes(q)) ||
+      (item.category && item.category.toLowerCase().includes(q))
+    )
+  })
+
+  // Pagination
+  const totalPages = Math.ceil(filtered.length / pageSize)
+  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize)
+
+  React.useEffect(() => {
+    if (page > totalPages) setPage(1)
+  }, [totalPages])
+
   return (
     <>
       <InventoryCreateForm onCreated={fetchItems} />
+      <div className="flex flex-wrap gap-2 mb-2 items-end">
+        <input
+          type="text"
+          placeholder="Search inventory..."
+          value={search}
+          onChange={e => { setSearch(e.target.value); setPage(1) }}
+          className="border px-2 py-1 rounded"
+        />
+      </div>
       {loading && <div>Loading inventory...</div>}
       {error && <div className="text-red-500">Error: {error}</div>}
-      {!loading && !error && !items.length && <div>No inventory found.</div>}
-      {!loading && !error && items.length > 0 && (
+      {!loading && !error && !paginated.length && <div>No inventory found.</div>}
+      {!loading && !error && paginated.length > 0 && (
         <div className="overflow-x-auto">
           <table className="min-w-full border text-sm">
             <thead>
@@ -49,7 +81,7 @@ export function InventoryList() {
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => (
+              {paginated.map((item) => (
                 <React.Fragment key={item.id}>
                   {editId === item.id ? (
                     <tr>
@@ -95,6 +127,26 @@ export function InventoryList() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+      {/* Pagination controls */}
+      {!loading && !error && totalPages > 1 && (
+        <div className="flex gap-2 mt-2">
+          <button
+            className="px-2 py-1 border rounded disabled:opacity-50"
+            onClick={() => setPage(page - 1)}
+            disabled={page === 1}
+          >
+            Prev
+          </button>
+          <span>Page {page} of {totalPages}</span>
+          <button
+            className="px-2 py-1 border rounded disabled:opacity-50"
+            onClick={() => setPage(page + 1)}
+            disabled={page === totalPages}
+          >
+            Next
+          </button>
         </div>
       )}
     </>
