@@ -4,6 +4,11 @@ import { db } from '@/lib/db/drizzle';
 import { payoutLedger, riderBookings, serviceRequests, teams } from '@/lib/db/schema';
 import { verifyPaystackSignature } from '@/lib/payments/paystack-marketplace';
 import { getPlanByPriceId } from '@/lib/payments/plans';
+import {
+  generateDocsForRiderBookingPayment,
+  generateDocsForServiceRequestPayment,
+  generateInvoiceForTeamSubscription
+} from '@/lib/pdf/auto-docs';
 
 type PaystackChargeEvent = {
   event: string;
@@ -117,8 +122,12 @@ export async function POST(request: NextRequest) {
           eq(riderBookings.paymentStatus, 'unpaid')
         )
       );
-
-    return NextResponse.json({ ok: true });
+    try {
+      const docs = await generateDocsForRiderBookingPayment(Number(riderBookingId));
+      return NextResponse.json({ ok: true, documents: docs });
+    } catch {
+      return NextResponse.json({ ok: true, documents: 'failed_to_generate' });
+    }
   }
 
   if (kind === 'team_subscription' && teamId && priceId) {
@@ -149,8 +158,17 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date()
       })
       .where(eq(teams.id, Number(teamId)));
-
-    return NextResponse.json({ ok: true });
+    try {
+      const docs = await generateInvoiceForTeamSubscription(
+        Number(teamId),
+        reference,
+        amount,
+        payload.data?.metadata?.planName ? String(payload.data.metadata.planName) : undefined
+      );
+      return NextResponse.json({ ok: true, documents: docs });
+    } catch {
+      return NextResponse.json({ ok: true, documents: 'failed_to_generate' });
+    }
   }
 
   if (!serviceRequestId) {
@@ -189,6 +207,10 @@ export async function POST(request: NextRequest) {
         eq(serviceRequests.paymentStatus, 'unpaid')
       )
     );
-
-  return NextResponse.json({ ok: true });
+  try {
+    const docs = await generateDocsForServiceRequestPayment(Number(serviceRequestId));
+    return NextResponse.json({ ok: true, documents: docs });
+  } catch {
+    return NextResponse.json({ ok: true, documents: 'failed_to_generate' });
+  }
 }

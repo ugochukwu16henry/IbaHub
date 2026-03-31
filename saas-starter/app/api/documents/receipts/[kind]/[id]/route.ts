@@ -9,6 +9,8 @@ import {
   users
 } from '@/lib/db/schema';
 import { renderPdfWithQuestPdf } from '@/lib/pdf/questpdf-client';
+import { storeGeneratedPdf } from '@/lib/pdf/document-store';
+import { buildPaymentDocumentPayload } from '@/lib/pdf/templates';
 
 export const runtime = 'nodejs';
 
@@ -54,29 +56,42 @@ export async function GET(_: Request, context: { params: Promise<Params> }) {
       if (!tx) return Response.json({ error: 'Receipt not found' }, { status: 404 });
 
       const pdf = await renderPdfWithQuestPdf({
-        template: 'payment_receipt',
+        ...buildPaymentDocumentPayload({
+          template: 'payment_receipt',
+          title: 'Retail POS Receipt',
+          reference: tx.idempotencyKey || `POS-${tx.id}`,
+          issuedAtIso: tx.createdAt?.toISOString?.() ?? new Date().toISOString(),
+          gross: money(tx.amountKobo),
+          from: team.name,
+          to: user.name || user.email,
+          lineItems: [
+            {
+              label: `POS payment (${tx.paymentMethod})`,
+              quantity: 1,
+              unitAmount: money(tx.amountKobo),
+              totalAmount: money(tx.amountKobo)
+            }
+          ],
+          notes: `Status: ${tx.status}`
+        })
+      });
+      const doc = await storeGeneratedPdf({
+        sourceKind: 'retail_pos_transaction',
+        sourceId: tx.id,
+        teamId: tx.teamId,
+        userId: user.id,
+        documentType: 'receipt',
         title: 'Retail POS Receipt',
         reference: tx.idempotencyKey || `POS-${tx.id}`,
-        issuedAtIso: tx.createdAt?.toISOString?.() ?? new Date().toISOString(),
-        currency: 'NGN',
-        totals: { gross: money(tx.amountKobo) },
-        parties: { from: team.name, to: user.name || user.email },
-        lineItems: [
-          {
-            label: `POS payment (${tx.paymentMethod})`,
-            quantity: 1,
-            unitAmount: money(tx.amountKobo),
-            totalAmount: money(tx.amountKobo)
-          }
-        ],
-        notes: `Status: ${tx.status}`
+        pdfBytes: pdf
       });
 
       return new Response(pdf, {
         status: 200,
         headers: {
           'content-type': 'application/pdf',
-          'content-disposition': `attachment; filename="retail-pos-${tx.id}.pdf"`
+          'content-disposition': `attachment; filename="retail-pos-${tx.id}.pdf"`,
+          'x-generated-document-id': String(doc.id)
         }
       });
     }
@@ -101,34 +116,45 @@ export async function GET(_: Request, context: { params: Promise<Params> }) {
 
       if (!booking) return Response.json({ error: 'Receipt not found' }, { status: 404 });
 
-      const pdf = await renderPdfWithQuestPdf({
-        template: 'payment_receipt',
-        title: 'Ride Payment Receipt',
-        reference: booking.paystackReference || `RIDE-${booking.id}`,
-        issuedAtIso: booking.createdAt?.toISOString?.() ?? new Date().toISOString(),
-        currency: 'NGN',
-        totals: {
+      const reference = booking.paystackReference || `RIDE-${booking.id}`;
+      const pdf = await renderPdfWithQuestPdf(
+        buildPaymentDocumentPayload({
+          template: 'payment_receipt',
+          title: 'Ride Payment Receipt',
+          reference,
+          issuedAtIso: booking.createdAt?.toISOString?.() ?? new Date().toISOString(),
           gross: money(booking.grossAmountKobo),
           fee: money(booking.platformFeeKobo),
-          net: money(booking.riderNetKobo)
-        },
-        parties: { from: user.name || user.email, to: 'Rider Partner' },
-        lineItems: [
-          {
-            label: `${booking.pickupLabel} -> ${booking.dropoffLabel}`,
-            quantity: 1,
-            unitAmount: money(booking.grossAmountKobo),
-            totalAmount: money(booking.grossAmountKobo)
-          }
-        ],
-        notes: `Payment status: ${booking.paymentStatus}`
+          net: money(booking.riderNetKobo),
+          from: user.name || user.email,
+          to: 'Rider Partner',
+          lineItems: [
+            {
+              label: `${booking.pickupLabel} -> ${booking.dropoffLabel}`,
+              quantity: 1,
+              unitAmount: money(booking.grossAmountKobo),
+              totalAmount: money(booking.grossAmountKobo)
+            }
+          ],
+          notes: `Payment status: ${booking.paymentStatus}`
+        })
+      );
+      const doc = await storeGeneratedPdf({
+        sourceKind: 'rider_booking',
+        sourceId: booking.id,
+        userId: user.id,
+        documentType: 'receipt',
+        title: 'Ride Payment Receipt',
+        reference,
+        pdfBytes: pdf
       });
 
       return new Response(pdf, {
         status: 200,
         headers: {
           'content-type': 'application/pdf',
-          'content-disposition': `attachment; filename="ride-booking-${booking.id}.pdf"`
+          'content-disposition': `attachment; filename="ride-booking-${booking.id}.pdf"`,
+          'x-generated-document-id': String(doc.id)
         }
       });
     }
@@ -162,30 +188,44 @@ export async function GET(_: Request, context: { params: Promise<Params> }) {
       if (!canAccess) return Response.json({ error: 'Forbidden' }, { status: 403 });
 
       const buyerName = purchase.buyerName || purchase.buyerEmail;
-      const pdf = await renderPdfWithQuestPdf({
-        template: 'payment_receipt',
+      const reference = `PR-${purchase.id}`;
+      const pdf = await renderPdfWithQuestPdf(
+        buildPaymentDocumentPayload({
+          template: 'payment_receipt',
+          title: 'Business Owner Purchase Receipt',
+          reference,
+          issuedAtIso: purchase.createdAt?.toISOString?.() ?? new Date().toISOString(),
+          gross: money(purchase.totalAmountKobo),
+          from: purchase.teamName,
+          to: buyerName,
+          lineItems: [
+            {
+              label: 'Purchase request payment',
+              quantity: purchase.quantity,
+              unitAmount: money(purchase.agreedUnitPriceKobo),
+              totalAmount: money(purchase.totalAmountKobo)
+            }
+          ],
+          notes: `Status: ${purchase.status}`
+        })
+      );
+      const doc = await storeGeneratedPdf({
+        sourceKind: 'retail_purchase_request',
+        sourceId: purchase.id,
+        teamId: purchase.teamId,
+        userId: purchase.buyerUserId,
+        documentType: 'receipt',
         title: 'Business Owner Purchase Receipt',
-        reference: `PR-${purchase.id}`,
-        issuedAtIso: purchase.createdAt?.toISOString?.() ?? new Date().toISOString(),
-        currency: 'NGN',
-        totals: { gross: money(purchase.totalAmountKobo) },
-        parties: { from: purchase.teamName, to: buyerName },
-        lineItems: [
-          {
-            label: 'Purchase request payment',
-            quantity: purchase.quantity,
-            unitAmount: money(purchase.agreedUnitPriceKobo),
-            totalAmount: money(purchase.totalAmountKobo)
-          }
-        ],
-        notes: `Status: ${purchase.status}`
+        reference,
+        pdfBytes: pdf
       });
 
       return new Response(pdf, {
         status: 200,
         headers: {
           'content-type': 'application/pdf',
-          'content-disposition': `attachment; filename="purchase-request-${purchase.id}.pdf"`
+          'content-disposition': `attachment; filename="purchase-request-${purchase.id}.pdf"`,
+          'x-generated-document-id': String(doc.id)
         }
       });
     }

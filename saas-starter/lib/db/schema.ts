@@ -530,6 +530,20 @@ export const businessOwnerReviews = pgTable(
   })
 );
 
+export const generatedDocuments = pgTable('generated_documents', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id').references(() => teams.id),
+  userId: integer('user_id').references(() => users.id),
+  sourceKind: varchar('source_kind', { length: 80 }).notNull(),
+  sourceId: integer('source_id'),
+  documentType: varchar('document_type', { length: 40 }).notNull(),
+  title: varchar('title', { length: 180 }).notNull(),
+  reference: varchar('reference', { length: 140 }).notNull(),
+  mimeType: varchar('mime_type', { length: 80 }).notNull().default('application/pdf'),
+  contentBase64: text('content_base64').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow()
+});
+
 export const teamsRelations = relations(teams, ({ many }) => ({
   teamMembers: many(teamMembers),
   activityLogs: many(activityLogs),
@@ -680,6 +694,17 @@ export const serviceReviewsRelations = relations(serviceReviews, ({ one }) => ({
   }),
 }));
 
+export const generatedDocumentsRelations = relations(generatedDocuments, ({ one }) => ({
+  team: one(teams, {
+    fields: [generatedDocuments.teamId],
+    references: [teams.id]
+  }),
+  user: one(users, {
+    fields: [generatedDocuments.userId],
+    references: [users.id]
+  })
+}));
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Team = typeof teams.$inferSelect;
@@ -732,6 +757,8 @@ export type RetailPurchaseRequest = typeof retailPurchaseRequests.$inferSelect;
 export type NewRetailPurchaseRequest = typeof retailPurchaseRequests.$inferInsert;
 export type BusinessOwnerReview = typeof businessOwnerReviews.$inferSelect;
 export type NewBusinessOwnerReview = typeof businessOwnerReviews.$inferInsert;
+export type GeneratedDocument = typeof generatedDocuments.$inferSelect;
+export type NewGeneratedDocument = typeof generatedDocuments.$inferInsert;
 export type TeamDataWithMembers = Team & {
   teamMembers: (TeamMember & {
     user: Pick<User, 'id' | 'name' | 'email'>;

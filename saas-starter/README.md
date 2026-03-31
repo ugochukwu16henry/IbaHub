@@ -178,8 +178,20 @@ Generate downloadable PDFs from Next.js:
 - `GET /api/documents/receipts/retail-pos/:id`
 - `GET /api/documents/receipts/rider-booking/:id`
 - `GET /api/documents/receipts/purchase-request/:id`
+- `GET /api/documents/invoices/rider-booking/:id`
+- `GET /api/documents/invoices/service-request/:id`
+- `GET /api/documents/invoices/purchase-request/:id`
+- `GET /api/documents/:id` (download previously generated document by id)
 
 These routes enforce existing app auth/tenant boundaries, fetch transaction data from Postgres, then call the QuestPDF service to render and return `application/pdf`.
+
+### Automatic generation from payments webhook
+
+- On `charge.success` for rider bookings and service requests, the webhook now auto-generates:
+  - payment receipt
+  - invoice
+- On successful team subscription payment, webhook auto-generates subscription invoice.
+- Generated files are persisted in DB table: `generated_documents` (migration: `0019_generated_documents.sql`).
 
 ## Going to Production
 
