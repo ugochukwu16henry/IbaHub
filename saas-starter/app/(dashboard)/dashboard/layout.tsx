@@ -55,6 +55,9 @@ export default function DashboardLayout({
     if (href === '/dashboard/rides/rider') {
       return pathname.startsWith('/dashboard/rides/rider');
     }
+    if (href === '/dashboard/rides/settings') {
+      return pathname.startsWith('/dashboard/rides/settings');
+    }
     if (href === '/dashboard/hub') {
       return (
         pathname.startsWith('/dashboard/hub') &&
@@ -81,6 +84,7 @@ export default function DashboardLayout({
     { href: '/dashboard/marketplace', icon: Users, label: 'Marketplace' },
     { href: '/dashboard/rides/book', icon: Bike, label: 'Book ride' },
     { href: '/dashboard/rides/rider', icon: Bike, label: 'Rider console' },
+    { href: '/dashboard/rides/settings', icon: Settings, label: 'Rider settings' },
     { href: '/dashboard/general', icon: Settings, label: 'General' },
     { href: '/dashboard/activity', icon: Activity, label: 'Activity' },
     { href: '/dashboard/security', icon: Shield, label: 'Security' }

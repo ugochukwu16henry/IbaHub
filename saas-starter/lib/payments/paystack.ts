@@ -1,56 +1,8 @@
 import { redirect } from 'next/navigation';
 import { Team } from '@/lib/db/schema';
 import { getUser } from '@/lib/db/queries';
-
-type LocalPrice = {
-  id: string;
-  productId: string;
-  unitAmount: number;
-  currency: string;
-  interval: string;
-  trialPeriodDays: number;
-};
-
-type LocalProduct = {
-  id: string;
-  name: string;
-  description: string;
-  defaultPriceId: string;
-};
-
-const LOCAL_PRICES: LocalPrice[] = [
-  {
-    id: 'base-local',
-    productId: 'base-local-product',
-    unitAmount: 800000,
-    currency: 'ngn',
-    interval: 'month',
-    trialPeriodDays: 7
-  },
-  {
-    id: 'plus-local',
-    productId: 'plus-local-product',
-    unitAmount: 1200000,
-    currency: 'ngn',
-    interval: 'month',
-    trialPeriodDays: 7
-  }
-];
-
-const LOCAL_PRODUCTS: LocalProduct[] = [
-  {
-    id: 'base-local-product',
-    name: 'Base',
-    description: 'Base subscription plan',
-    defaultPriceId: 'base-local'
-  },
-  {
-    id: 'plus-local-product',
-    name: 'Plus',
-    description: 'Plus subscription plan',
-    defaultPriceId: 'plus-local'
-  }
-];
+import { initializePaystackTransaction } from './paystack-marketplace';
+import { LOCAL_PRICES, LOCAL_PRODUCTS, getPlanByPriceId } from './plans';
 
 export async function createCheckoutSession({
   team,
@@ -65,8 +17,28 @@ export async function createCheckoutSession({
     redirect(`/sign-up?redirect=checkout&priceId=${priceId}`);
   }
 
-  // TODO: Initialize a Paystack transaction and redirect to authorization_url.
-  redirect('/dashboard/hub/payments');
+  const selected = getPlanByPriceId(priceId);
+  if (!selected) {
+    throw new Error('Invalid subscription plan selected');
+  }
+
+  const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+  const reference = `sub_${team.id}_${Date.now()}`;
+  const tx = await initializePaystackTransaction({
+    email: user.email,
+    amountKobo: selected.price.unitAmount,
+    reference,
+    callbackUrl: `${baseUrl}/dashboard?payment=subscription_callback`,
+    metadata: {
+      kind: 'team_subscription',
+      teamId: team.id,
+      userId: user.id,
+      priceId: selected.price.id,
+      planName: selected.product.name
+    }
+  });
+
+  redirect(tx.authorization_url);
 }
 
 export async function createCustomerPortalSession(_: Team) {

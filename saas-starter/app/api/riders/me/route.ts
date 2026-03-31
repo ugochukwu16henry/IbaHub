@@ -17,6 +17,10 @@ const patchSchema = z.object({
   lng: z.number().optional(),
   heading: z.number().optional(),
   isOnline: z.boolean().optional()
+  ,
+  bankCode: z.string().min(3).max(12).optional(),
+  accountNumber: z.string().min(10).max(20).optional(),
+  accountName: z.string().min(2).max(120).optional()
 });
 
 export async function GET() {
@@ -68,6 +72,9 @@ export async function PATCH(request: Request) {
       serviceZone: patch.serviceZone?.trim() ?? undefined,
       availabilityStatus: patch.availabilityStatus,
       photoUrl: patch.photoUrl?.trim() ?? undefined,
+      bankCode: patch.bankCode?.trim() ?? undefined,
+      accountNumber: patch.accountNumber?.trim() ?? undefined,
+      accountName: patch.accountName?.trim() ?? undefined,
       updatedAt: new Date()
     })
     .where(and(eq(riderProfiles.userId, user.id)))

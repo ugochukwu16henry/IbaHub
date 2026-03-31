@@ -13,6 +13,9 @@ type RiderProfile = {
   availabilityStatus: string;
   photoUrl: string | null;
   verificationStatus: string;
+  bankCode: string | null;
+  accountNumber: string | null;
+  accountName: string | null;
 };
 
 type RiderBooking = {
@@ -28,6 +31,14 @@ type RiderBooking = {
   riderNetKobo: number;
 };
 
+type RiderPayout = {
+  id: number;
+  bookingId: number;
+  amountNetKobo: number;
+  status: string;
+  transferReference: string | null;
+};
+
 const money = (kobo: number) =>
   new Intl.NumberFormat('en-NG', {
     style: 'currency',
@@ -40,6 +51,11 @@ export default function RiderConsolePage() {
   const [bookings, setBookings] = useState<RiderBooking[]>([]);
   const [photoUrl, setPhotoUrl] = useState('');
   const [online, setOnline] = useState(false);
+  const [bankCode, setBankCode] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
+  const [accountName, setAccountName] = useState('');
+  const [payouts, setPayouts] = useState<RiderPayout[]>([]);
+  const [payoutMessage, setPayoutMessage] = useState('');
 
   async function load() {
     const p = await fetch('/api/riders/me').then((r) => r.json());
@@ -47,9 +63,14 @@ export default function RiderConsolePage() {
       setProfile(p.profile);
       setPhotoUrl(p.profile.photoUrl || '');
       setOnline(p.profile.availabilityStatus === 'available');
+      setBankCode(p.profile.bankCode || '');
+      setAccountNumber(p.profile.accountNumber || '');
+      setAccountName(p.profile.accountName || '');
     }
     const b = await fetch('/api/rides/bookings/rider').then((r) => r.json());
     setBookings(b.bookings || []);
+    const payoutRes = await fetch('/api/rides/payouts/rider').then((r) => r.json());
+    setPayouts(payoutRes.payouts || []);
   }
 
   useEffect(() => {
@@ -84,10 +105,27 @@ export default function RiderConsolePage() {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         photoUrl,
+        bankCode,
+        accountNumber,
+        accountName,
         availabilityStatus: online ? 'available' : 'offline',
         isOnline: online
       })
     });
+    load();
+  }
+
+  async function releasePayout(payoutId: number) {
+    setPayoutMessage('');
+    const res = await fetch(`/api/rides/payouts/${payoutId}/release`, {
+      method: 'POST'
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setPayoutMessage(data.error || 'Payout release failed');
+    } else {
+      setPayoutMessage(`Payout sent successfully (${data.transferReference || 'ok'})`);
+    }
     load();
   }
 
@@ -118,6 +156,23 @@ export default function RiderConsolePage() {
             onChange={(e) => setPhotoUrl(e.target.value)}
             placeholder="Face photo URL"
           />
+          <div className="grid md:grid-cols-3 gap-2">
+            <Input
+              value={bankCode}
+              onChange={(e) => setBankCode(e.target.value)}
+              placeholder="Bank code (e.g. 058)"
+            />
+            <Input
+              value={accountNumber}
+              onChange={(e) => setAccountNumber(e.target.value)}
+              placeholder="Account number"
+            />
+            <Input
+              value={accountName}
+              onChange={(e) => setAccountName(e.target.value)}
+              placeholder="Account name"
+            />
+          </div>
           <div className="flex gap-2">
             <Button variant={online ? 'default' : 'outline'} onClick={() => setOnline(true)}>
               Go online
@@ -127,6 +182,36 @@ export default function RiderConsolePage() {
             </Button>
             <Button onClick={saveProfile}>Save</Button>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Payouts</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {payoutMessage ? (
+            <p className="text-sm text-muted-foreground">{payoutMessage}</p>
+          ) : null}
+          {payouts.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No payouts yet.</p>
+          ) : (
+            payouts.map((p) => (
+              <div key={p.id} className="border rounded-lg p-3 space-y-2">
+                <p className="text-sm font-medium">
+                  Booking #{p.bookingId} • {money(p.amountNetKobo)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Status: {p.status} {p.transferReference ? `• Ref: ${p.transferReference}` : ''}
+                </p>
+                {p.status === 'ready_for_payout' ? (
+                  <Button size="sm" onClick={() => releasePayout(p.id)}>
+                    Release payout to bank
+                  </Button>
+                ) : null}
+              </div>
+            ))
+          )}
         </CardContent>
       </Card>
 

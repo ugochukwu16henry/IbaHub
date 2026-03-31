@@ -71,7 +71,7 @@ Use your Paystack test keys and test cards in the Paystack dashboard to validate
 - Customer flow: choose nearest rider, pay upfront via Paystack, track status, confirm completion, then rate rider.
 - Rider flow: go online, receive requests, start ride only after payment, mark done.
 - Platform commission: 5% per rider booking (computed server-side).
-- Payout readiness: after customer confirmation, booking is marked ready for payout ledger processing.
+- Payout readiness: after customer confirmation, payout is auto-released after `PAYOUT_DELAY_MINUTES` (default: 30).
 - Core endpoints:
   - `GET /api/rides/nearest?pickupLat=..&pickupLng=..`
   - `POST /api/rides/bookings`

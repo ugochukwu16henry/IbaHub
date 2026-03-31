@@ -3,6 +3,11 @@ import { z } from 'zod';
 import { db } from '@/lib/db/drizzle';
 import { getUser } from '@/lib/db/queries';
 import { payoutLedger, riderBookings, riderProfiles } from '@/lib/db/schema';
+import {
+  getPayoutByBookingId,
+  processDuePayouts,
+  releaseRiderPayoutById
+} from '@/lib/payments/rider-payouts';
 
 export const runtime = 'nodejs';
 
@@ -118,15 +123,31 @@ export async function PATCH(
       .where(eq(riderBookings.id, booking.id));
 
     if (booking.riderProfileId) {
+      const delayMinutes = Math.max(
+        0,
+        Number(process.env.PAYOUT_DELAY_MINUTES || 30)
+      );
+      const releaseAfterAt =
+        delayMinutes > 0
+          ? new Date(Date.now() + delayMinutes * 60 * 1000)
+          : null;
+
       await db
         .insert(payoutLedger)
         .values({
           bookingId: booking.id,
           riderProfileId: booking.riderProfileId,
           amountNetKobo: booking.riderNetKobo,
-          status: 'ready_for_payout'
+          status: delayMinutes > 0 ? 'pending_delay' : 'ready_for_payout',
+          releaseAfterAt
         })
         .onConflictDoNothing();
+
+      const payout = await getPayoutByBookingId(booking.id);
+      if (payout && payout.status === 'ready_for_payout') {
+        await releaseRiderPayoutById(payout.id);
+      }
+      await processDuePayouts();
     }
   }
 

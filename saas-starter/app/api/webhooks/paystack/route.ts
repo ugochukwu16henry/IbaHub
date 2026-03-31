@@ -1,8 +1,9 @@
 import { eq, and } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db/drizzle';
-import { riderBookings, serviceRequests } from '@/lib/db/schema';
+import { payoutLedger, riderBookings, serviceRequests, teams } from '@/lib/db/schema';
 import { verifyPaystackSignature } from '@/lib/payments/paystack-marketplace';
+import { getPlanByPriceId } from '@/lib/payments/plans';
 
 type PaystackChargeEvent = {
   event: string;
@@ -14,6 +15,9 @@ type PaystackChargeEvent = {
       kind?: string;
       serviceRequestId?: number;
       riderBookingId?: number;
+      teamId?: number;
+      priceId?: string;
+      planName?: string;
       [key: string]: unknown;
     };
   };
@@ -35,6 +39,20 @@ export async function POST(request: NextRequest) {
   }
 
   if (payload.event !== 'charge.success') {
+    if (
+      (payload.event === 'transfer.success' || payload.event === 'transfer.failed') &&
+      payload.data?.reference
+    ) {
+      const nextStatus = payload.event === 'transfer.success' ? 'paid' : 'failed';
+      await db
+        .update(payoutLedger)
+        .set({
+          status: nextStatus,
+          updatedAt: new Date()
+        })
+        .where(eq(payoutLedger.transferReference, payload.data.reference));
+      return NextResponse.json({ ok: true, transferStatusUpdated: nextStatus });
+    }
     return NextResponse.json({ ok: true, ignored: payload.event ?? 'unknown' });
   }
 
@@ -43,6 +61,8 @@ export async function POST(request: NextRequest) {
   const kind = payload.data?.metadata?.kind;
   const serviceRequestId = payload.data?.metadata?.serviceRequestId;
   const riderBookingId = payload.data?.metadata?.riderBookingId;
+  const teamId = payload.data?.metadata?.teamId;
+  const priceId = payload.data?.metadata?.priceId;
   if (!reference || !amount) {
     return NextResponse.json({ error: 'Missing required payment metadata' }, { status: 400 });
   }
@@ -78,6 +98,32 @@ export async function POST(request: NextRequest) {
           eq(riderBookings.paymentStatus, 'unpaid')
         )
       );
+
+    return NextResponse.json({ ok: true });
+  }
+
+  if (kind === 'team_subscription' && teamId && priceId) {
+    const selected = getPlanByPriceId(String(priceId));
+    if (!selected) {
+      return NextResponse.json({ error: 'Unknown plan price' }, { status: 400 });
+    }
+    if (selected.price.unitAmount !== amount) {
+      return NextResponse.json({ error: 'Amount mismatch for plan' }, { status: 400 });
+    }
+
+    const [team] = await db.select().from(teams).where(eq(teams.id, Number(teamId))).limit(1);
+    if (!team) {
+      return NextResponse.json({ error: 'Team not found' }, { status: 404 });
+    }
+
+    await db
+      .update(teams)
+      .set({
+        planName: selected.product.name,
+        subscriptionStatus: 'active',
+        updatedAt: new Date()
+      })
+      .where(eq(teams.id, Number(teamId)));
 
     return NextResponse.json({ ok: true });
   }
