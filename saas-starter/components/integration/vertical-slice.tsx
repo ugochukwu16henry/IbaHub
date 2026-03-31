@@ -14,6 +14,7 @@ import {
 import { getValidatedIntegrationBaseUrl } from '@/lib/integration/boundaries';
 import { gatewayFetch } from '@/lib/integration/server-gateway';
 import { INTEGRATION_SERVICES, type IntegrationServiceId } from '@/lib/integration/services';
+import { getDomainListPath } from '@/lib/integration/domain-data';
 import { ArrowLeft } from 'lucide-react';
 
 const SLICE_COPY: Record<
@@ -48,12 +49,18 @@ export async function IntegrationVerticalSlice({
   const healthSegments = [...INTEGRATION_ROUTE_TEMPLATES[service].health];
   const healthPath = healthSegments.join('/');
 
-  let status: number | undefined;
-  let preview: string;
+  const listPath = getDomainListPath(service);
+  const listSegments = listPath.split('/').filter(Boolean);
+
+  let healthStatus: number | undefined;
+  let healthPreview: string;
+  let listStatus: number | undefined;
+  let listPreview: string;
   let error: string | undefined;
 
   if (!validated.ok) {
-    preview = '';
+    healthPreview = '';
+    listPreview = '';
     if (validated.reason === 'not_configured') {
       error = `Set ${envKey} in .env, then run health checks from the integration hub.`;
     } else if (validated.reason === 'host_not_allowed') {
@@ -64,18 +71,32 @@ export async function IntegrationVerticalSlice({
     }
   } else {
     try {
-      const res = await gatewayFetch(service, healthPath);
-      status = res.status;
-      const text = await res.text();
-      preview =
-        text.length > 1200 ? `${text.slice(0, 1200)}…` : text || '(empty body)';
+      // 1) Probe health (template-based)
+      const healthRes = await gatewayFetch(service, healthPath);
+      healthStatus = healthRes.status;
+      const healthText = await healthRes.text();
+      healthPreview =
+        healthText.length > 1200
+          ? `${healthText.slice(0, 1200)}…`
+          : healthText || '(empty body)';
+
+      // 2) Probe primary list endpoint (plan §3.5–§3.6)
+      const listRes = await gatewayFetch(service, listPath);
+      listStatus = listRes.status;
+      const listText = await listRes.text();
+      listPreview =
+        listText.length > 1200
+          ? `${listText.slice(0, 1200)}…`
+          : listText || '(empty body)';
     } catch (e) {
       error = e instanceof Error ? e.message : 'Request failed';
-      preview = '';
+      healthPreview = '';
+      listPreview = '';
     }
   }
 
   const browserPath = integrationGatewayPath(service, ...healthSegments);
+  const listBrowserPath = integrationGatewayPath(service, ...listSegments);
 
   return (
     <section className="flex-1 p-4 lg:p-8 max-w-3xl">
@@ -88,29 +109,59 @@ export async function IntegrationVerticalSlice({
       <h1 className="text-lg lg:text-2xl font-medium mb-2">{copy.title}</h1>
       <p className="text-sm text-muted-foreground mb-6">{copy.description}</p>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Gateway response</CardTitle>
-          <CardDescription className="font-mono text-xs break-all">
-            {browserPath}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="text-sm space-y-3">
-          {error ? (
-            <p className="text-amber-800">{error}</p>
-          ) : (
-            <>
-              <p className="text-muted-foreground">
-                HTTP status:{' '}
-                <span className="font-medium text-foreground">{status}</span>
-              </p>
-              <pre className="text-xs bg-gray-50 border border-gray-100 rounded-md p-3 overflow-x-auto whitespace-pre-wrap">
-                {preview || '(no body)'}
-              </pre>
-            </>
-          )}
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Gateway health probe</CardTitle>
+            <CardDescription className="font-mono text-xs break-all">
+              {browserPath}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-sm space-y-3">
+            {error ? (
+              <p className="text-amber-800">{error}</p>
+            ) : (
+              <>
+                <p className="text-muted-foreground">
+                  HTTP status:{' '}
+                  <span className="font-medium text-foreground">
+                    {healthStatus ?? '—'}
+                  </span>
+                </p>
+                <pre className="text-xs bg-gray-50 border border-gray-100 rounded-md p-3 overflow-x-auto whitespace-pre-wrap">
+                  {healthPreview || '(no body)'}
+                </pre>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Gateway primary list</CardTitle>
+            <CardDescription className="font-mono text-xs break-all">
+              {listBrowserPath}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-sm space-y-3">
+            {error ? (
+              <p className="text-amber-800">{error}</p>
+            ) : (
+              <>
+                <p className="text-muted-foreground">
+                  HTTP status:{' '}
+                  <span className="font-medium text-foreground">
+                    {listStatus ?? '—'}
+                  </span>
+                </p>
+                <pre className="text-xs bg-gray-50 border border-gray-100 rounded-md p-3 overflow-x-auto whitespace-pre-wrap">
+                  {listPreview || '(no body)'}
+                </pre>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </section>
   );
 }
