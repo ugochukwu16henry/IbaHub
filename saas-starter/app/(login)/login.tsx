@@ -74,6 +74,25 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
           <input type="hidden" name="redirect" value={redirect || ''} />
           <input type="hidden" name="priceId" value={priceId || ''} />
           <input type="hidden" name="inviteId" value={inviteId || ''} />
+          {mode === 'signup' ? (
+            <div>
+              <Label
+                htmlFor="accountType"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Account type
+              </Label>
+              <select
+                id="accountType"
+                name="accountType"
+                className="mt-1 w-full rounded-full border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                defaultValue="member"
+              >
+                <option value="member">Customer / Member</option>
+                <option value="rider">Rider</option>
+              </select>
+            </div>
+          ) : null}
           <div>
             <Label
               htmlFor="email"
@@ -120,6 +139,65 @@ export function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
               />
             </div>
           </div>
+          {mode === 'signup' ? (
+            <>
+              <div>
+                <Label
+                  htmlFor="phone"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Phone (required for rider onboarding)
+                </Label>
+                <div className="mt-1">
+                  <Input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    autoComplete="tel"
+                    maxLength={30}
+                    className="appearance-none rounded-full relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
+                    placeholder="+234..."
+                  />
+                </div>
+              </div>
+              <div>
+                <Label
+                  htmlFor="vehicleType"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Vehicle type (rider only)
+                </Label>
+                <div className="mt-1">
+                  <Input
+                    id="vehicleType"
+                    name="vehicleType"
+                    type="text"
+                    maxLength={40}
+                    className="appearance-none rounded-full relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
+                    placeholder="Bike / Tricycle / Car"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label
+                  htmlFor="serviceZone"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Service zone (rider only)
+                </Label>
+                <div className="mt-1">
+                  <Input
+                    id="serviceZone"
+                    name="serviceZone"
+                    type="text"
+                    maxLength={100}
+                    className="appearance-none rounded-full relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
+                    placeholder="Uyo Plaza / Itam / Uniuyo axis"
+                  />
+                </div>
+              </div>
+            </>
+          ) : null}
 
           {state?.error && (
             <div className="text-red-500 text-sm">{state.error}</div>

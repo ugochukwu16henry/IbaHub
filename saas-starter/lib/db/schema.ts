@@ -59,6 +59,32 @@ export const activityLogs = pgTable('activity_logs', {
   ipAddress: varchar('ip_address', { length: 45 }),
 });
 
+/** Rider onboarding + availability state for gig/logistics booking flows. */
+export const riderProfiles = pgTable(
+  'rider_profiles',
+  {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id),
+    phone: varchar('phone', { length: 30 }),
+    vehicleType: varchar('vehicle_type', { length: 40 }),
+    serviceZone: varchar('service_zone', { length: 100 }),
+    verificationStatus: varchar('verification_status', { length: 20 })
+      .notNull()
+      .default('pending'),
+    availabilityStatus: varchar('availability_status', { length: 20 })
+      .notNull()
+      .default('offline'),
+    kycNotes: text('kyc_notes'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => ({
+    riderUserUnique: uniqueIndex('rider_profiles_user_unique').on(t.userId),
+  })
+);
+
 /** Dedupe inbound webhooks by Idempotency-Key + source (§3.8 / productized ingress). */
 export const webhookInbox = pgTable(
   'webhook_inbox',
@@ -100,6 +126,7 @@ export const teamsRelations = relations(teams, ({ many }) => ({
 export const usersRelations = relations(users, ({ many }) => ({
   teamMembers: many(teamMembers),
   invitationsSent: many(invitations),
+  riderProfiles: many(riderProfiles),
 }));
 
 export const invitationsRelations = relations(invitations, ({ one }) => ({
@@ -135,6 +162,13 @@ export const activityLogsRelations = relations(activityLogs, ({ one }) => ({
   }),
 }));
 
+export const riderProfilesRelations = relations(riderProfiles, ({ one }) => ({
+  user: one(users, {
+    fields: [riderProfiles.userId],
+    references: [users.id],
+  }),
+}));
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Team = typeof teams.$inferSelect;
@@ -143,6 +177,8 @@ export type TeamMember = typeof teamMembers.$inferSelect;
 export type NewTeamMember = typeof teamMembers.$inferInsert;
 export type ActivityLog = typeof activityLogs.$inferSelect;
 export type NewActivityLog = typeof activityLogs.$inferInsert;
+export type RiderProfile = typeof riderProfiles.$inferSelect;
+export type NewRiderProfile = typeof riderProfiles.$inferInsert;
 export type WebhookInbox = typeof webhookInbox.$inferSelect;
 export type NewWebhookInbox = typeof webhookInbox.$inferInsert;
 export type Invitation = typeof invitations.$inferSelect;

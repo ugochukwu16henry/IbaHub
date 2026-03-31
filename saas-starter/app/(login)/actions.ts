@@ -8,6 +8,7 @@ import {
   users,
   teams,
   teamMembers,
+  riderProfiles,
   activityLogs,
   type NewUser,
   type NewTeam,
@@ -103,11 +104,23 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 const signUpSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
-  inviteId: z.string().optional()
+  inviteId: z.string().optional(),
+  accountType: z.enum(['member', 'rider']).optional(),
+  phone: z.string().max(30).optional(),
+  vehicleType: z.string().max(40).optional(),
+  serviceZone: z.string().max(100).optional()
 });
 
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
-  const { email, password, inviteId } = data;
+  const {
+    email,
+    password,
+    inviteId,
+    accountType,
+    phone,
+    vehicleType,
+    serviceZone
+  } = data;
 
   const existingUser = await db
     .select()
@@ -128,7 +141,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const newUser: NewUser = {
     email,
     passwordHash,
-    role: 'owner' // Default role, will be overridden if there's an invitation
+    role: accountType === 'rider' ? 'rider' : 'owner' // Default role, overridden by invitation flow
   };
 
   const [createdUser] = await db.insert(users).values(newUser).returning();
@@ -208,6 +221,18 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   await Promise.all([
     db.insert(teamMembers).values(newTeamMember),
+    ...(accountType === 'rider'
+      ? [
+          db.insert(riderProfiles).values({
+            userId: createdUser.id,
+            phone: phone?.trim() || null,
+            vehicleType: vehicleType?.trim() || null,
+            serviceZone: serviceZone?.trim() || null,
+            verificationStatus: 'pending',
+            availabilityStatus: 'offline'
+          })
+        ]
+      : []),
     logActivity(teamId, createdUser.id, ActivityType.SIGN_UP),
     setSession(createdUser)
   ]);
