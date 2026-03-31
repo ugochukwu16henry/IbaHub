@@ -10,7 +10,8 @@ import {
   Shield,
   Activity,
   Menu,
-  LayoutGrid
+  LayoutGrid,
+  Link2
 } from 'lucide-react';
 
 export default function DashboardLayout({
@@ -22,14 +23,21 @@ export default function DashboardLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   function isNavActive(href: string) {
+    if (href === '/dashboard/hub/tenants') {
+      return pathname.startsWith('/dashboard/hub/tenants');
+    }
     if (href === '/dashboard/hub') {
-      return pathname === href || pathname.startsWith('/dashboard/hub/');
+      return (
+        pathname.startsWith('/dashboard/hub') &&
+        !pathname.startsWith('/dashboard/hub/tenants')
+      );
     }
     return pathname === href;
   }
 
   const navItems = [
     { href: '/dashboard/hub', icon: LayoutGrid, label: 'Integration hub' },
+    { href: '/dashboard/hub/tenants', icon: Link2, label: 'Tenant mappings' },
     { href: '/dashboard', icon: Users, label: 'Team' },
     { href: '/dashboard/general', icon: Settings, label: 'General' },
     { href: '/dashboard/activity', icon: Activity, label: 'Activity' },

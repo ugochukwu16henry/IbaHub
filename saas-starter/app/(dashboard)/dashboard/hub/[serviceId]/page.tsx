@@ -8,6 +8,7 @@ import {
   CardTitle
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { INTEGRATION_ROUTE_TEMPLATES } from '@/lib/integration/contracts';
 import {
   getIntegrationBaseUrl,
   INTEGRATION_SERVICES,
@@ -28,6 +29,7 @@ export default async function IntegrationServicePage({ params }: Props) {
   const meta = INTEGRATION_SERVICES.find((s) => s.id === serviceId)!;
   const base = getIntegrationBaseUrl(serviceId);
   const configured = Boolean(base);
+  const templates = INTEGRATION_ROUTE_TEMPLATES[serviceId];
 
   return (
     <section className="flex-1 p-4 lg:p-8 max-w-3xl">
@@ -53,7 +55,12 @@ export default async function IntegrationServicePage({ params }: Props) {
           )}
         </span>
       </div>
-      <p className="text-sm text-muted-foreground mb-6">{meta.description}</p>
+      <p className="text-sm text-muted-foreground mb-4">{meta.description}</p>
+      <Button variant="outline" size="sm" className="mb-6" asChild>
+        <Link href={`/dashboard/hub/slices/${serviceId}`}>
+          Open gateway probe (vertical slice)
+        </Link>
+      </Button>
 
       <Card className="mb-6">
         <CardHeader>
@@ -98,6 +105,22 @@ export default async function IntegrationServicePage({ params }: Props) {
             <code>{`GET /api/gateway/${serviceId}/health`}</code> →{' '}
             <code>{configured ? `${base}/health` : '<base>/health'}</code>
           </p>
+          <div className="pt-3 border-t border-gray-100 mt-3">
+            <p className="text-muted-foreground text-xs font-sans mb-1">
+              Contract templates (edit in{' '}
+              <code className="bg-gray-100 px-0.5 rounded">
+                lib/integration/contracts.ts
+              </code>
+              ):
+            </p>
+            <ul className="text-xs font-mono space-y-1">
+              {Object.entries(templates).map(([key, segs]) => (
+                <li key={key}>
+                  {key}: /{segs.join('/')}
+                </li>
+              ))}
+            </ul>
+          </div>
         </CardContent>
       </Card>
     </section>

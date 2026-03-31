@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth/session';
+import { getTeamForUser } from '@/lib/db/queries';
+import { parseIntegrationMappings } from '@/lib/integration/mappings';
 import {
   getIntegrationBaseUrl,
   type IntegrationServiceId
@@ -28,6 +30,8 @@ async function proxy(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const team = await getTeamForUser();
+
   const { service, path: pathSegments } = await context.params;
   if (!isIntegrationServiceId(service)) {
     return NextResponse.json({ error: 'Unknown service' }, { status: 404 });
@@ -48,6 +52,21 @@ async function proxy(
   for (const name of ALLOW_FORWARD_HEADERS) {
     const value = request.headers.get(name);
     if (value) forwardHeaders.set(name, value);
+  }
+
+  forwardHeaders.set('X-IbaHub-User-Id', String(session.user.id));
+  if (team) {
+    forwardHeaders.set('X-IbaHub-Team-Id', String(team.id));
+    const ext = parseIntegrationMappings(team.integrationMappings ?? undefined);
+    if (ext?.logisticsOrgId) {
+      forwardHeaders.set('X-IbaHub-Logistics-Org-Id', ext.logisticsOrgId);
+    }
+    if (ext?.gigOrgId) {
+      forwardHeaders.set('X-IbaHub-Gig-Org-Id', ext.gigOrgId);
+    }
+    if (ext?.retailOrgId) {
+      forwardHeaders.set('X-IbaHub-Retail-Org-Id', ext.retailOrgId);
+    }
   }
 
   const init: RequestInit = {
@@ -86,6 +105,13 @@ async function proxy(
 }
 
 export function GET(
+  request: NextRequest,
+  context: { params: Promise<{ service: string; path?: string[] }> }
+) {
+  return proxy(request, context);
+}
+
+export function HEAD(
   request: NextRequest,
   context: { params: Promise<{ service: string; path?: string[] }> }
 ) {
