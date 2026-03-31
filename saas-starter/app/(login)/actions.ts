@@ -102,10 +102,20 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 });
 
 const signUpSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-  inviteId: z.string().optional(),
-  accountType: z.enum(['member', 'rider']).optional(),
+  email: z.preprocess(
+    (val) => (typeof val === 'string' ? val.trim().toLowerCase() : val),
+    z.string().email().min(3).max(255)
+  ),
+  password: z.string().min(8).max(100),
+  inviteId: z
+    .string()
+    .optional()
+    .transform((v) => (v === '' ? undefined : v)),
+  accountType: z.preprocess(
+    (val) =>
+      val === '' || val === undefined ? undefined : val,
+    z.enum(['member', 'rider']).optional()
+  ),
   phone: z.string().max(30).optional(),
   vehicleType: z.string().max(40).optional(),
   serviceZone: z.string().max(100).optional()
@@ -170,93 +180,115 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     };
   }
 
-  let teamId: number;
-  let userRole: string;
-  let createdTeam: typeof teams.$inferSelect | null = null;
+  try {
+    let teamId: number;
+    let userRole: string;
+    let createdTeam: typeof teams.$inferSelect | null = null;
 
-  if (inviteId) {
-    // Check if there's a valid invitation
-    const [invitation] = await db
-      .select()
-      .from(invitations)
-      .where(
-        and(
-          eq(invitations.id, parseInt(inviteId)),
-          eq(invitations.email, email),
-          eq(invitations.status, 'pending')
-        )
-      )
-      .limit(1);
+    if (inviteId) {
+      const inviteIdNum = Number.parseInt(inviteId, 10);
+      if (!Number.isFinite(inviteIdNum)) {
+        return { error: 'Invalid or expired invitation.', email, password };
+      }
 
-    if (invitation) {
-      teamId = invitation.teamId;
-      userRole = invitation.role;
-
-      await db
-        .update(invitations)
-        .set({ status: 'accepted' })
-        .where(eq(invitations.id, invitation.id));
-
-      await logActivity(teamId, createdUser.id, ActivityType.ACCEPT_INVITATION);
-
-      [createdTeam] = await db
+      const [invitation] = await db
         .select()
-        .from(teams)
-        .where(eq(teams.id, teamId))
+        .from(invitations)
+        .where(
+          and(
+            eq(invitations.id, inviteIdNum),
+            eq(invitations.email, email),
+            eq(invitations.status, 'pending')
+          )
+        )
         .limit(1);
+
+      if (invitation) {
+        teamId = invitation.teamId;
+        userRole = invitation.role;
+
+        await db
+          .update(invitations)
+          .set({ status: 'accepted' })
+          .where(eq(invitations.id, invitation.id));
+
+        await logActivity(teamId, createdUser.id, ActivityType.ACCEPT_INVITATION);
+
+        [createdTeam] = await db
+          .select()
+          .from(teams)
+          .where(eq(teams.id, teamId))
+          .limit(1);
+      } else {
+        return { error: 'Invalid or expired invitation.', email, password };
+      }
     } else {
-      return { error: 'Invalid or expired invitation.', email, password };
+      const newTeam: NewTeam = {
+        name: `${email}'s Team`
+      };
+
+      [createdTeam] = await db.insert(teams).values(newTeam).returning();
+
+      if (!createdTeam) {
+        return {
+          error: 'Failed to create team. Please try again.',
+          email,
+          password
+        };
+      }
+
+      teamId = createdTeam.id;
+      userRole = 'owner';
+
+      await logActivity(teamId, createdUser.id, ActivityType.CREATE_TEAM);
     }
-  } else {
-    // Create a new team if there's no invitation
-    const newTeam: NewTeam = {
-      name: `${email}'s Team`
+
+    const newTeamMember: NewTeamMember = {
+      userId: createdUser.id,
+      teamId: teamId,
+      role: userRole
     };
 
-    [createdTeam] = await db.insert(teams).values(newTeam).returning();
+    await Promise.all([
+      db.insert(teamMembers).values(newTeamMember),
+      ...(accountType === 'rider'
+        ? [
+            db.insert(riderProfiles).values({
+              userId: createdUser.id,
+              phone: phone?.trim() || null,
+              vehicleType: vehicleType?.trim() || null,
+              serviceZone: serviceZone?.trim() || null,
+              verificationStatus: 'pending',
+              availabilityStatus: 'offline'
+            })
+          ]
+        : []),
+      logActivity(teamId, createdUser.id, ActivityType.SIGN_UP),
+      setSession(createdUser)
+    ]);
 
-    if (!createdTeam) {
+    const redirectTo = formData.get('redirect') as string | null;
+    if (redirectTo === 'checkout') {
+      const priceId = formData.get('priceId') as string;
+      return createCheckoutSession({ team: createdTeam, priceId });
+    }
+  } catch (error) {
+    console.error('[signUp]', error);
+    const msg = error instanceof Error ? error.message : '';
+    if (msg.includes('AUTH_SECRET')) {
       return {
-        error: 'Failed to create team. Please try again.',
+        error:
+          'Sign-in is not configured on the server (AUTH_SECRET). Add a secret of at least 32 characters in your environment.',
         email,
         password
       };
     }
-
-    teamId = createdTeam.id;
-    userRole = 'owner';
-
-    await logActivity(teamId, createdUser.id, ActivityType.CREATE_TEAM);
-  }
-
-  const newTeamMember: NewTeamMember = {
-    userId: createdUser.id,
-    teamId: teamId,
-    role: userRole
-  };
-
-  await Promise.all([
-    db.insert(teamMembers).values(newTeamMember),
-    ...(accountType === 'rider'
-      ? [
-          db.insert(riderProfiles).values({
-            userId: createdUser.id,
-            phone: phone?.trim() || null,
-            vehicleType: vehicleType?.trim() || null,
-            serviceZone: serviceZone?.trim() || null,
-            verificationStatus: 'pending',
-            availabilityStatus: 'offline'
-          })
-        ]
-      : []),
-    logActivity(teamId, createdUser.id, ActivityType.SIGN_UP),
-    setSession(createdUser)
-  ]);
-
-  const redirectTo = formData.get('redirect') as string | null;
-  if (redirectTo === 'checkout') {
-    const priceId = formData.get('priceId') as string;
-    return createCheckoutSession({ team: createdTeam, priceId });
+    return {
+      error:
+        'Could not finish creating your account. Check your connection, try again, or sign in if you already registered.',
+      email,
+      password
+    };
   }
 
   redirect('/dashboard');

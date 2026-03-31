@@ -4,8 +4,17 @@ import { cookies } from 'next/headers';
 import type { NextResponse } from 'next/server';
 import { NewUser } from '@/lib/db/schema';
 
-const key = new TextEncoder().encode(process.env.AUTH_SECRET);
 const SALT_ROUNDS = 10;
+
+function getAuthSecretKey(): Uint8Array {
+  const secret = process.env.AUTH_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error(
+      'AUTH_SECRET must be set and at least 32 characters (e.g. openssl rand -base64 32).'
+    );
+  }
+  return new TextEncoder().encode(secret);
+}
 
 export async function hashPassword(password: string) {
   return hash(password, SALT_ROUNDS);
@@ -28,11 +37,11 @@ export async function signToken(payload: SessionData) {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('1 day from now')
-    .sign(key);
+    .sign(getAuthSecretKey());
 }
 
 export async function verifyToken(input: string) {
-  const { payload } = await jwtVerify(input, key, {
+  const { payload } = await jwtVerify(input, getAuthSecretKey(), {
     algorithms: ['HS256'],
   });
   return payload as SessionData;
@@ -57,9 +66,10 @@ async function buildSessionCookieValue(user: NewUser) {
 export async function setSession(user: NewUser) {
   const { encryptedSession, expiresInOneDay } = await buildSessionCookieValue(user);
   (await cookies()).set('session', encryptedSession, {
+    path: '/',
     expires: expiresInOneDay,
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
   });
 }
@@ -70,7 +80,7 @@ export async function setSessionOnResponse(response: NextResponse, user: NewUser
   response.cookies.set('session', encryptedSession, {
     expires: expiresInOneDay,
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
   });
