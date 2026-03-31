@@ -23,7 +23,7 @@ export const HARMONIZATION_STEPS: HarmonizationStep[] = [
     ],
     status: 'partial',
     implementationHint:
-      'saas-starter: auth, teams, Stripe, dashboard; PWA manifest; design system via shared UI components.'
+      'saas-starter: auth, teams, Paystack billing, dashboard; PWA manifest; design system via shared UI components.'
   },
   {
     step: 2,
