@@ -150,6 +150,37 @@ Use your Paystack test keys and test cards in the Paystack dashboard to validate
 - Expiration: Any future date
 - CVC: Any 3-digit number
 
+## QuestPDF document generation (receipts + payment docs)
+
+This workspace includes a dedicated QuestPDF microservice for production-grade PDF generation:
+
+- Service path: `services/ibahub-pdf-service`
+- Engine: [QuestPDF](https://github.com/QuestPDF/QuestPDF)
+- Compose target: `ibahub-pdf-service` on `http://localhost:7071`
+
+### Run PDF service
+
+```bash
+docker compose up -d ibahub-pdf-service
+```
+
+Or run directly with .NET:
+
+```bash
+cd services/ibahub-pdf-service
+dotnet run
+```
+
+### Receipt API endpoints
+
+Generate downloadable PDFs from Next.js:
+
+- `GET /api/documents/receipts/retail-pos/:id`
+- `GET /api/documents/receipts/rider-booking/:id`
+- `GET /api/documents/receipts/purchase-request/:id`
+
+These routes enforce existing app auth/tenant boundaries, fetch transaction data from Postgres, then call the QuestPDF service to render and return `application/pdf`.
+
 ## Going to Production
 
 When you're ready to deploy your SaaS application to production, follow these steps:

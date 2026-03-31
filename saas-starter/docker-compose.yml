@@ -11,6 +11,15 @@ services:
       - "54322:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+  ibahub-pdf-service:
+    build:
+      context: ./services/ibahub-pdf-service
+      dockerfile: Dockerfile
+    container_name: ibahub_pdf_service
+    ports:
+      - "7071:7071"
+    environment:
+      PDF_SERVICE_TOKEN: ${PDF_SERVICE_TOKEN:-}
 
 volumes:
   postgres_data:
