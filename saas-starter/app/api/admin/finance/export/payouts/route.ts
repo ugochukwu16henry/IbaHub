@@ -1,17 +1,19 @@
 import { desc, eq } from 'drizzle-orm';
 import { isOwnerAdmin } from '@/lib/admin/auth';
 import { toCsv } from '@/lib/admin/csv';
+import { parseDateRange, inRange } from '@/lib/admin/date-range';
 import { db } from '@/lib/db/drizzle';
 import { payoutLedger, riderProfiles, users } from '@/lib/db/schema';
 import { processDuePayouts } from '@/lib/payments/rider-payouts';
 
 export const runtime = 'nodejs';
 
-export async function GET() {
+export async function GET(request: Request) {
   await processDuePayouts();
   if (!(await isOwnerAdmin())) {
     return Response.json({ error: 'Forbidden' }, { status: 403 });
   }
+  const { from, to, fromRaw, toRaw } = parseDateRange(new URL(request.url).searchParams);
 
   const payouts = await db
     .select({
@@ -31,6 +33,7 @@ export async function GET() {
     .innerJoin(users, eq(riderProfiles.userId, users.id))
     .orderBy(desc(payoutLedger.createdAt));
 
+  const filtered = payouts.filter((p) => inRange(p.createdAt, from, to));
   const csv = toCsv(
     [
       'id',
@@ -44,7 +47,7 @@ export async function GET() {
       'riderName',
       'riderEmail'
     ],
-    payouts.map((p) => [
+    filtered.map((p) => [
       p.id,
       p.bookingId,
       p.amountNetKobo,
@@ -62,7 +65,7 @@ export async function GET() {
     status: 200,
     headers: {
       'content-type': 'text/csv; charset=utf-8',
-      'content-disposition': 'attachment; filename="payouts.csv"'
+      'content-disposition': `attachment; filename="payouts${fromRaw || toRaw ? `-${fromRaw || 'start'}-to-${toRaw || 'end'}` : ''}.csv"`
     }
   });
 }

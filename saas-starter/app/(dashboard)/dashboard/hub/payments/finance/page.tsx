@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 
 type FinanceData = {
   users: Array<{
@@ -64,6 +65,16 @@ function MetricRow({
 export default function AdminFinancePage() {
   const [data, setData] = useState<FinanceData | null>(null);
   const [error, setError] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+
+  const exportQuery =
+    fromDate || toDate
+      ? `?${new URLSearchParams({
+          ...(fromDate ? { from: fromDate } : {}),
+          ...(toDate ? { to: toDate } : {})
+        }).toString()}`
+      : '';
 
   async function load() {
     setError('');
@@ -89,18 +100,39 @@ export default function AdminFinancePage() {
         </Link>
       </Button>
       <h1 className="text-lg lg:text-2xl font-medium">Admin Finance & Audit</h1>
+      <Card>
+        <CardHeader>
+          <CardTitle>Export date range</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-wrap items-end gap-3">
+          <div>
+            <p className="text-xs text-muted-foreground mb-1">From</p>
+            <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground mb-1">To</p>
+            <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+          </div>
+          <Button variant="outline" size="sm" onClick={() => {
+            setFromDate('');
+            setToDate('');
+          }}>
+            Clear range
+          </Button>
+        </CardContent>
+      </Card>
       <div className="flex flex-wrap gap-2">
         <Button variant="outline" size="sm" asChild>
-          <a href="/api/admin/finance/export/users">Export users CSV</a>
+          <a href={`/api/admin/finance/export/users${exportQuery}`}>Export users CSV</a>
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <a href="/api/admin/finance/export/payouts">Export payouts CSV</a>
+          <a href={`/api/admin/finance/export/payouts${exportQuery}`}>Export payouts CSV</a>
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <a href="/api/admin/finance/export/pnl-monthly">Export monthly P&L CSV</a>
+          <a href={`/api/admin/finance/export/pnl-monthly${exportQuery}`}>Export monthly P&L CSV</a>
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <a href="/api/admin/finance/export/audit">Export audit CSV</a>
+          <a href={`/api/admin/finance/export/audit${exportQuery}`}>Export audit CSV</a>
         </Button>
       </div>
 
