@@ -1,25 +1,165 @@
 openapi: 3.0.3
 info:
   title: IbaHub Retail / inventory service boundary
-  version: 0.1.0
+  version: 1.0.0
   description: |
-    Stub contract for QUANTUM-STASH inventory and POS.
-    Replace with real OpenAPI export from that app when available.
+    Native retail parity contract implemented in IbaHub.
 servers:
-  - url: '{INTEGRATION_RETAIL_URL}'
-    description: Set in environment; gateway uses /api/gateway/retail/…
+  - url: /api/retail
+    description: Native IbaHub retail API
 paths:
-  /health:
+  /products:
     get:
-      summary: Health probe
-      operationId: retailHealth
-      responses:
-        '200':
-          description: Service reachable
-  /api/products:
-    get:
-      summary: Example product list (template)
+      summary: List products
       operationId: retailProductsList
       responses:
         '200':
           description: OK
+    post:
+      summary: Create product
+      operationId: retailProductsCreate
+      responses:
+        '201':
+          description: Created
+  /products/{id}:
+    get:
+      summary: Get product
+      operationId: retailProductsGet
+      responses:
+        '200':
+          description: OK
+    put:
+      summary: Update product
+      operationId: retailProductsUpdate
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Delete product
+      operationId: retailProductsDelete
+      responses:
+        '200':
+          description: Deleted
+  /inventory:
+    get:
+      summary: List inventory (alias of products)
+      operationId: retailInventoryList
+      responses:
+        '200':
+          description: OK
+  /orders:
+    get:
+      summary: List orders
+      operationId: retailOrdersList
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Create order
+      operationId: retailOrdersCreate
+      responses:
+        '201':
+          description: Created
+  /orders/{id}:
+    get:
+      summary: Get order
+      operationId: retailOrdersGet
+      responses:
+        '200':
+          description: OK
+    put:
+      summary: Update order
+      operationId: retailOrdersUpdate
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Delete order
+      operationId: retailOrdersDelete
+      responses:
+        '200':
+          description: Deleted
+  /pos:
+    get:
+      summary: List POS transactions
+      operationId: retailPosList
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Create POS transaction
+      operationId: retailPosCreate
+      responses:
+        '201':
+          description: Created
+  /pos/{id}:
+    get:
+      summary: Get POS transaction
+      operationId: retailPosGet
+      responses:
+        '200':
+          description: OK
+    put:
+      summary: Update POS transaction
+      operationId: retailPosUpdate
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Delete POS transaction
+      operationId: retailPosDelete
+      responses:
+        '200':
+          description: Deleted
+  /categories:
+    get:
+      summary: List categories
+      operationId: retailCategoriesList
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Create category
+      operationId: retailCategoriesCreate
+      responses:
+        '201':
+          description: Created
+  /brands:
+    get:
+      summary: List brands
+      operationId: retailBrandsList
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Create brand
+      operationId: retailBrandsCreate
+      responses:
+        '201':
+          description: Created
+  /units:
+    get:
+      summary: List units
+      operationId: retailUnitsList
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Create unit
+      operationId: retailUnitsCreate
+      responses:
+        '201':
+          description: Created
+  /warehouses:
+    get:
+      summary: List warehouses
+      operationId: retailWarehousesList
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Create warehouse
+      operationId: retailWarehousesCreate
+      responses:
+        '201':
+          description: Created

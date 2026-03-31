@@ -97,6 +97,30 @@ Use your Paystack test keys and test cards in the Paystack dashboard to validate
   - `teams.subscription_renews_at`
   - `teams.last_paystack_payment_reference`
 
+## Native retail parity (IbaHub)
+
+- Full retail workspace routes:
+  - `/dashboard/hub/retail`
+  - `/dashboard/hub/retail/items`
+  - `/dashboard/hub/retail/categories`
+  - `/dashboard/hub/retail/brands`
+  - `/dashboard/hub/retail/units`
+  - `/dashboard/hub/retail/warehouses`
+  - `/dashboard/hub/retail/orders`
+  - `/dashboard/hub/retail/pos`
+  - `/dashboard/hub/retail/inventory-adjustments`
+- Native retail API (organization-scoped + active subscription gate):
+  - `/api/retail/products` + `/api/retail/products/:id`
+  - `/api/retail/inventory` + `/api/retail/inventory/:id`
+  - `/api/retail/orders` + `/api/retail/orders/:id`
+  - `/api/retail/pos` + `/api/retail/pos/:id`
+  - `/api/retail/categories` + `/api/retail/categories/:id`
+  - `/api/retail/brands` + `/api/retail/brands/:id`
+  - `/api/retail/units` + `/api/retail/units/:id`
+  - `/api/retail/warehouses` + `/api/retail/warehouses/:id`
+  - `/api/retail/inventory-adjustments`
+- New DB migration for native parity: `0012_retail_native_parity.sql`
+
 - Card Number: `4242 4242 4242 4242`
 - Expiration: Any future date
 - CVC: Any 3-digit number
