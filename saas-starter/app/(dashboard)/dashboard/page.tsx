@@ -31,7 +31,7 @@ function SubscriptionSkeleton() {
   return (
     <Card className="mb-8 h-[140px]">
       <CardHeader>
-        <CardTitle>Team Subscription</CardTitle>
+        <CardTitle>Organization Subscription</CardTitle>
       </CardHeader>
     </Card>
   );
@@ -43,7 +43,7 @@ function ManageSubscription() {
   return (
     <Card className="mb-8">
       <CardHeader>
-        <CardTitle>Team Subscription</CardTitle>
+        <CardTitle>Organization Subscription</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -76,7 +76,7 @@ function TeamMembersSkeleton() {
   return (
     <Card className="mb-8 h-[140px]">
       <CardHeader>
-        <CardTitle>Team Members</CardTitle>
+        <CardTitle>Organization Members</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="animate-pulse space-y-4 mt-1">
@@ -108,10 +108,10 @@ function TeamMembers() {
     return (
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>Team Members</CardTitle>
+          <CardTitle>Organization Members</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">No team members yet.</p>
+          <p className="text-muted-foreground">No organization members yet.</p>
         </CardContent>
       </Card>
     );
@@ -120,7 +120,7 @@ function TeamMembers() {
   return (
     <Card className="mb-8">
       <CardHeader>
-        <CardTitle>Team Members</CardTitle>
+        <CardTitle>Organization Members</CardTitle>
       </CardHeader>
       <CardContent>
         <ul className="space-y-4">
@@ -181,7 +181,7 @@ function InviteTeamMemberSkeleton() {
   return (
     <Card className="h-[260px]">
       <CardHeader>
-        <CardTitle>Invite Team Member</CardTitle>
+        <CardTitle>Invite Organization Member</CardTitle>
       </CardHeader>
     </Card>
   );
@@ -198,7 +198,7 @@ function InviteTeamMember() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Invite Team Member</CardTitle>
+        <CardTitle>Invite Organization Member</CardTitle>
       </CardHeader>
       <CardContent>
         <form action={inviteAction} className="space-y-4">
@@ -261,7 +261,7 @@ function InviteTeamMember() {
       {!isOwner && (
         <CardFooter>
           <p className="text-sm text-muted-foreground">
-            You must be a team owner to invite new members.
+            You must be an organization owner to invite new members.
           </p>
         </CardFooter>
       )}
@@ -272,7 +272,7 @@ function InviteTeamMember() {
 export default function SettingsPage() {
   return (
     <section className="flex-1 p-4 lg:p-8">
-      <h1 className="text-lg lg:text-2xl font-medium mb-6">Team Settings</h1>
+      <h1 className="text-lg lg:text-2xl font-medium mb-6">Organization Settings</h1>
       <Suspense fallback={<SubscriptionSkeleton />}>
         <ManageSubscription />
       </Suspense>

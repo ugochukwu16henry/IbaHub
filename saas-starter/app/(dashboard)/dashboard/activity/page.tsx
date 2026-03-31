@@ -82,11 +82,11 @@ function formatAction(action: string): string {
     case ActivityType.UPDATE_ACCOUNT:
       return 'You updated your account';
     case ActivityType.CREATE_TEAM:
-      return 'You created a new team';
+      return 'You created a new organization';
     case ActivityType.REMOVE_TEAM_MEMBER:
-      return 'You removed a team member';
+      return 'You removed an organization member';
     case ActivityType.INVITE_TEAM_MEMBER:
-      return 'You invited a team member';
+      return 'You invited an organization member';
     case ActivityType.ACCEPT_INVITATION:
       return 'You accepted an invitation';
     default:

@@ -20,7 +20,7 @@ const OAUTH_ERROR_HINT: Record<string, string> = {
   oauth_no_sub: 'Your IdP did not return a subject (sub) claim.',
   oauth_no_id_token: 'No ID token from IdP.',
   oauth_create_failed: 'Could not create account.',
-  oauth_team_failed: 'Could not create team.',
+  oauth_team_failed: 'Could not create organization.',
   sso_disabled: 'SSO is not configured on the server.'
 };
 

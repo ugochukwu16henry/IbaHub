@@ -42,23 +42,23 @@ export default function TenantMappingsPage() {
         </Link>
       </Button>
       <h1 className="text-lg lg:text-2xl font-medium mb-6">
-        Team ↔ service tenants
+        Organization ↔ service tenants
       </h1>
       <Card>
         <CardHeader>
           <CardTitle>Upstream tenant IDs</CardTitle>
           <CardDescription>
-            Map this IbaHub team to organization records in each connected
+            Map this IbaHub organization to organization records in each connected
             backend. Values are forwarded on gateway requests as{' '}
             <code className="text-xs bg-gray-100 px-0.5 rounded">
               X-IbaHub-*-Org-Id
             </code>{' '}
-            (team owners only).
+            (organization owners only).
           </CardDescription>
         </CardHeader>
         <CardContent>
           {!team ? (
-            <p className="text-sm text-muted-foreground">Loading team…</p>
+            <p className="text-sm text-muted-foreground">Loading organization…</p>
           ) : (
             <form key={formKey} action={action} className="space-y-4">
               <div>

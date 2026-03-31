@@ -394,7 +394,7 @@ export const removeTeamMember = validatedActionWithUser(
     const userWithTeam = await getUserWithTeam(user.id);
 
     if (!userWithTeam?.teamId) {
-      return { error: 'User is not part of a team' };
+      return { error: 'User is not part of an organization' };
     }
 
     await db
@@ -412,7 +412,7 @@ export const removeTeamMember = validatedActionWithUser(
       ActivityType.REMOVE_TEAM_MEMBER
     );
 
-    return { success: 'Team member removed successfully' };
+    return { success: 'Organization member removed successfully' };
   }
 );
 
@@ -428,7 +428,7 @@ export const inviteTeamMember = validatedActionWithUser(
     const userWithTeam = await getUserWithTeam(user.id);
 
     if (!userWithTeam?.teamId) {
-      return { error: 'User is not part of a team' };
+      return { error: 'User is not part of an organization' };
     }
 
     const existingMember = await db
@@ -441,7 +441,7 @@ export const inviteTeamMember = validatedActionWithUser(
       .limit(1);
 
     if (existingMember.length > 0) {
-      return { error: 'User is already a member of this team' };
+      return { error: 'User is already a member of this organization' };
     }
 
     // Check if there's an existing invitation

@@ -52,7 +52,7 @@ export default function HubPaymentsPage() {
             <Link href={shell.pricingPath}>Pricing</Link>
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link href={shell.teamSettingsPath}>Team &amp; subscription</Link>
+            <Link href={shell.teamSettingsPath}>Organization &amp; subscription</Link>
           </Button>
         </CardContent>
       </Card>
@@ -96,7 +96,7 @@ export default function HubPaymentsPage() {
           <p className="text-xs text-muted-foreground">
             Include <code className="bg-gray-100 px-0.5 rounded">teamId</code> in
             JSON or <code className="bg-gray-100 px-0.5 rounded">X-IbaHub-Team-Id</code>{' '}
-            to append a row to that team’s activity log (same for the generic
+            to append a row to that organization's activity log (same for the generic
             integration webhook).
           </p>
         </CardContent>
