@@ -206,8 +206,8 @@ When you're ready to deploy your SaaS application to production, follow these st
 ### Deploy to Vercel
 
 1. Push your code to a GitHub repository.
-2. Connect your repository to [Vercel](https://vercel.com/) and deploy it.
-3. Follow the Vercel deployment process, which will guide you through setting up your project.
+2. Connect your repository to [Vercel](https://vercel.com/) and deploy it. In **Project → Settings → General → Root Directory**, leave the root as the **repository root** (do not set it to `saas-starter` alone). The repo uses pnpm workspaces and a single `pnpm-lock.yaml` at the root; the root `package.json` `build` script runs `next build` inside `saas-starter`.
+3. Follow the Vercel deployment process, which will guide you through setting up your project. The root `vercel.json` sets `installCommand` / `buildCommand` to match that layout.
 
 ### Add environment variables
 

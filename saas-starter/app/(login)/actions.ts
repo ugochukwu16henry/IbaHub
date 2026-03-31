@@ -180,100 +180,126 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     };
   }
 
+  let teamId: number;
+  let createdTeam: typeof teams.$inferSelect | null = null;
   try {
-    let teamId: number;
-    let userRole: string;
-    let createdTeam: typeof teams.$inferSelect | null = null;
+    const txResult = await db.transaction(async (tx) => {
+      let txTeamId: number;
+      let userRole: string;
+      let txCreatedTeam: typeof teams.$inferSelect | null = null;
 
-    if (inviteId) {
-      const inviteIdNum = Number.parseInt(inviteId, 10);
-      if (!Number.isFinite(inviteIdNum)) {
-        return { error: 'Invalid or expired invitation.', email, password };
-      }
+      if (inviteId) {
+        const inviteIdNum = Number.parseInt(inviteId, 10);
+        if (!Number.isFinite(inviteIdNum)) {
+          return { error: 'Invalid or expired invitation.' as const };
+        }
 
-      const [invitation] = await db
-        .select()
-        .from(invitations)
-        .where(
-          and(
-            eq(invitations.id, inviteIdNum),
-            eq(invitations.email, email),
-            eq(invitations.status, 'pending')
+        const [invitation] = await tx
+          .select()
+          .from(invitations)
+          .where(
+            and(
+              eq(invitations.id, inviteIdNum),
+              eq(invitations.email, email),
+              eq(invitations.status, 'pending')
+            )
           )
-        )
-        .limit(1);
+          .limit(1);
 
-      if (invitation) {
-        teamId = invitation.teamId;
+        if (!invitation) {
+          return { error: 'Invalid or expired invitation.' as const };
+        }
+
+        txTeamId = invitation.teamId;
         userRole = invitation.role;
 
-        await db
+        await tx
           .update(invitations)
           .set({ status: 'accepted' })
           .where(eq(invitations.id, invitation.id));
 
-        await logActivity(teamId, createdUser.id, ActivityType.ACCEPT_INVITATION);
+        await tx.insert(activityLogs).values({
+          teamId: txTeamId,
+          userId: createdUser.id,
+          action: ActivityType.ACCEPT_INVITATION,
+          ipAddress: ''
+        });
 
-        [createdTeam] = await db
+        [txCreatedTeam] = await tx
           .select()
           .from(teams)
-          .where(eq(teams.id, teamId))
+          .where(eq(teams.id, txTeamId))
           .limit(1);
       } else {
-        return { error: 'Invalid or expired invitation.', email, password };
+        const newTeam: NewTeam = {
+          name: `${email}'s Team`
+        };
+
+        [txCreatedTeam] = await tx.insert(teams).values(newTeam).returning();
+
+        if (!txCreatedTeam) {
+          return { error: 'Failed to create team. Please try again.' as const };
+        }
+
+        txTeamId = txCreatedTeam.id;
+        userRole = 'owner';
+
+        await tx.insert(activityLogs).values({
+          teamId: txTeamId,
+          userId: createdUser.id,
+          action: ActivityType.CREATE_TEAM,
+          ipAddress: ''
+        });
       }
-    } else {
-      const newTeam: NewTeam = {
-        name: `${email}'s Team`
+
+      const newTeamMember: NewTeamMember = {
+        userId: createdUser.id,
+        teamId: txTeamId,
+        role: userRole
       };
 
-      [createdTeam] = await db.insert(teams).values(newTeam).returning();
+      await tx.insert(teamMembers).values(newTeamMember);
 
-      if (!createdTeam) {
-        return {
-          error: 'Failed to create team. Please try again.',
-          email,
-          password
-        };
+      if (accountType === 'rider') {
+        await tx.insert(riderProfiles).values({
+          userId: createdUser.id,
+          phone: phone?.trim() || null,
+          vehicleType: vehicleType?.trim() || null,
+          serviceZone: serviceZone?.trim() || null,
+          verificationStatus: 'pending',
+          availabilityStatus: 'offline'
+        });
       }
 
-      teamId = createdTeam.id;
-      userRole = 'owner';
+      await tx.insert(activityLogs).values({
+        teamId: txTeamId,
+        userId: createdUser.id,
+        action: ActivityType.SIGN_UP,
+        ipAddress: ''
+      });
 
-      await logActivity(teamId, createdUser.id, ActivityType.CREATE_TEAM);
+      return { teamId: txTeamId, createdTeam: txCreatedTeam };
+    });
+
+    if ('error' in txResult) {
+      return { error: txResult.error, email, password };
     }
 
-    const newTeamMember: NewTeamMember = {
-      userId: createdUser.id,
-      teamId: teamId,
-      role: userRole
-    };
-
-    await Promise.all([
-      db.insert(teamMembers).values(newTeamMember),
-      ...(accountType === 'rider'
-        ? [
-            db.insert(riderProfiles).values({
-              userId: createdUser.id,
-              phone: phone?.trim() || null,
-              vehicleType: vehicleType?.trim() || null,
-              serviceZone: serviceZone?.trim() || null,
-              verificationStatus: 'pending',
-              availabilityStatus: 'offline'
-            })
-          ]
-        : []),
-      logActivity(teamId, createdUser.id, ActivityType.SIGN_UP),
-      setSession(createdUser)
-    ]);
-
-    const redirectTo = formData.get('redirect') as string | null;
-    if (redirectTo === 'checkout') {
-      const priceId = formData.get('priceId') as string;
-      return createCheckoutSession({ team: createdTeam, priceId });
-    }
+    teamId = txResult.teamId;
+    createdTeam = txResult.createdTeam;
   } catch (error) {
     console.error('[signUp]', error);
+    return {
+      error:
+        'Could not finish creating your account. Check your connection, try again, or sign in if you already registered.',
+      email,
+      password
+    };
+  }
+
+  try {
+    await setSession(createdUser);
+  } catch (error) {
     const msg = error instanceof Error ? error.message : '';
     if (msg.includes('AUTH_SECRET')) {
       return {
@@ -285,10 +311,16 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
     }
     return {
       error:
-        'Could not finish creating your account. Check your connection, try again, or sign in if you already registered.',
+        'Account created, but we could not sign you in automatically. Please use Sign in.',
       email,
       password
     };
+  }
+
+  const redirectTo = formData.get('redirect') as string | null;
+  if (redirectTo === 'checkout') {
+    const priceId = formData.get('priceId') as string;
+    return createCheckoutSession({ team: createdTeam, priceId });
   }
 
   redirect('/dashboard');
