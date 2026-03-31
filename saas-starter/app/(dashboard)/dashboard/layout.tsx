@@ -15,7 +15,8 @@ import {
   ListOrdered,
   ClipboardCheck,
   Database,
-  CreditCard
+  CreditCard,
+  Bike
 } from 'lucide-react';
 
 export default function DashboardLayout({
@@ -42,6 +43,9 @@ export default function DashboardLayout({
     if (href === '/dashboard/hub/payments') {
       return pathname.startsWith('/dashboard/hub/payments');
     }
+    if (href === '/dashboard/hub/riders') {
+      return pathname.startsWith('/dashboard/hub/riders');
+    }
     if (href === '/dashboard/hub') {
       return (
         pathname.startsWith('/dashboard/hub') &&
@@ -49,7 +53,8 @@ export default function DashboardLayout({
         !pathname.startsWith('/dashboard/hub/roadmap') &&
         !pathname.startsWith('/dashboard/hub/audit') &&
         !pathname.startsWith('/dashboard/hub/data') &&
-        !pathname.startsWith('/dashboard/hub/payments')
+        !pathname.startsWith('/dashboard/hub/payments') &&
+        !pathname.startsWith('/dashboard/hub/riders')
       );
     }
     return pathname === href;
@@ -60,6 +65,7 @@ export default function DashboardLayout({
     { href: '/dashboard/hub/roadmap', icon: ListOrdered, label: 'Plan roadmap' },
     { href: '/dashboard/hub/audit', icon: ClipboardCheck, label: 'Repo audit' },
     { href: '/dashboard/hub/data', icon: Database, label: 'Domain data' },
+    { href: '/dashboard/hub/riders', icon: Bike, label: 'Rider verification' },
     { href: '/dashboard/hub/payments', icon: CreditCard, label: 'Hub payments' },
     { href: '/dashboard/hub/tenants', icon: Link2, label: 'Tenant mappings' },
     { href: '/dashboard', icon: Users, label: 'Team' },

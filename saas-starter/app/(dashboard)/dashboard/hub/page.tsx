@@ -178,6 +178,9 @@ export default function IntegrationHubPage() {
             <Button variant="outline" size="sm" asChild>
               <Link href="/dashboard/hub/slices/retail">Retail slice</Link>
             </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/dashboard/hub/riders">Rider verification</Link>
+            </Button>
           </div>
         </div>
         <ul className="space-y-3">
