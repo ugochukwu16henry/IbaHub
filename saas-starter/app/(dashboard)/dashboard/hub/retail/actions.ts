@@ -130,6 +130,29 @@ export const updatePurchaseRequestStatusAction = withTeam(async (formData, team)
   revalidatePath('/dashboard/hub/retail/purchase-requests');
 });
 
+export const saveStorefrontSettingsAction = withTeam(async (formData, team) => {
+  await ensureOwner(team);
+  const settings = {
+    showPrice: String(formData.get('showPrice') || '') === 'true',
+    showStock: String(formData.get('showStock') || '') === 'true',
+    showCategory: String(formData.get('showCategory') || '') === 'true',
+    showPhone: String(formData.get('showPhone') || '') === 'true',
+    showWhatsapp: String(formData.get('showWhatsapp') || '') === 'true',
+    showWebsite: String(formData.get('showWebsite') || '') === 'true',
+    showMap: String(formData.get('showMap') || '') === 'true',
+    customHeadline: String(formData.get('customHeadline') || '').trim() || null,
+    customNotice: String(formData.get('customNotice') || '').trim() || null
+  };
+
+  await db
+    .update(teams)
+    .set({ storefrontSettings: JSON.stringify(settings), updatedAt: new Date() })
+    .where(eq(teams.id, team.id));
+
+  revalidatePath('/dashboard/hub/retail/storefront-settings');
+  revalidatePath('/shops');
+});
+
 export const createFirstProductAction = withTeam(async (formData, team) => {
   await ensureOwner(team);
   if (team.subscriptionStatus !== 'active') {

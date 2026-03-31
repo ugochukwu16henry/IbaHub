@@ -1,6 +1,6 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/drizzle';
-import { retailItems, teams } from '@/lib/db/schema';
+import { businessOwnerReviews, retailItems, teams } from '@/lib/db/schema';
 
 export async function GET(_: Request, context: { params: Promise<{ slug: string }> }) {
   const slug = String((await context.params).slug || '').trim().toLowerCase();
@@ -16,7 +16,8 @@ export async function GET(_: Request, context: { params: Promise<{ slug: string 
       businessWhatsapp: teams.businessWhatsapp,
       businessWebsiteUrl: teams.businessWebsiteUrl,
       businessLat: teams.businessLat,
-      businessLng: teams.businessLng
+      businessLng: teams.businessLng,
+      storefrontSettings: teams.storefrontSettings
     })
     .from(teams)
     .where(and(eq(teams.shopSlug, slug), eq(teams.isStorefrontPublic, true)))
@@ -35,5 +36,46 @@ export async function GET(_: Request, context: { params: Promise<{ slug: string 
     .from(retailItems)
     .where(eq(retailItems.teamId, shop.id));
 
-  return Response.json({ shop, items });
+  const approvedTestimonials = await db
+    .select({
+      id: businessOwnerReviews.id,
+      rating: businessOwnerReviews.rating,
+      professionalism: businessOwnerReviews.professionalism,
+      honesty: businessOwnerReviews.honesty,
+      quality: businessOwnerReviews.quality,
+      communication: businessOwnerReviews.communication,
+      timeliness: businessOwnerReviews.timeliness,
+      comment: businessOwnerReviews.comment,
+      createdAt: businessOwnerReviews.createdAt
+    })
+    .from(businessOwnerReviews)
+    .where(
+      and(
+        eq(businessOwnerReviews.teamId, shop.id),
+        eq(businessOwnerReviews.adminStatus, 'approved')
+      )
+    );
+
+  const avg = await db
+    .select({
+      avgRating: sql<number>`coalesce(avg(${businessOwnerReviews.rating}), 0)`,
+      total: sql<number>`count(*)`
+    })
+    .from(businessOwnerReviews)
+    .where(
+      and(
+        eq(businessOwnerReviews.teamId, shop.id),
+        eq(businessOwnerReviews.adminStatus, 'approved')
+      )
+    );
+
+  return Response.json({
+    shop,
+    items,
+    testimonials: approvedTestimonials,
+    summary: {
+      averageRating: Number(avg[0]?.avgRating || 0),
+      totalTestimonials: Number(avg[0]?.total || 0)
+    }
+  });
 }

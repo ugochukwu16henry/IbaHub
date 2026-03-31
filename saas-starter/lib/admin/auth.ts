@@ -8,3 +8,9 @@ export async function isOwnerAdmin() {
   const member = team.teamMembers.find((m) => m.userId === user.id);
   return member?.role === 'owner';
 }
+
+export async function isPlatformAdmin() {
+  const user = await getUser();
+  if (!user) return false;
+  return user.role === 'admin';
+}

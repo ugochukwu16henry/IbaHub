@@ -47,6 +47,7 @@ export const teams = pgTable('teams', {
   shopSlug: varchar('shop_slug', { length: 120 }),
   isStorefrontPublic: boolean('is_storefront_public').notNull().default(false),
   inventoryAddonActive: boolean('inventory_addon_active').notNull().default(false),
+  storefrontSettings: text('storefront_settings'),
   businessProfileCompleted: boolean('business_profile_completed')
     .notNull()
     .default(false),
@@ -385,6 +386,9 @@ export const retailItems = pgTable(
     warehouseId: integer('warehouse_id').references(() => retailWarehouses.id),
     quantity: integer('quantity').notNull().default(0),
     reorderPoint: integer('reorder_point').notNull().default(0),
+    images: text('images'),
+    details: text('details'),
+    variants: text('variants'),
     purchasePriceKobo: integer('purchase_price_kobo').notNull().default(0),
     sellingPriceKobo: integer('selling_price_kobo').notNull().default(0),
     createdAt: timestamp('created_at').notNull().defaultNow(),
@@ -491,6 +495,40 @@ export const retailPurchaseRequests = pgTable('retail_purchase_requests', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow()
 });
+
+export const businessOwnerReviews = pgTable(
+  'business_owner_reviews',
+  {
+    id: serial('id').primaryKey(),
+    teamId: integer('team_id')
+      .notNull()
+      .references(() => teams.id),
+    purchaseRequestId: integer('purchase_request_id')
+      .notNull()
+      .references(() => retailPurchaseRequests.id),
+    buyerUserId: integer('buyer_user_id')
+      .notNull()
+      .references(() => users.id),
+    rating: integer('rating').notNull(),
+    professionalism: integer('professionalism').notNull(),
+    honesty: integer('honesty').notNull(),
+    quality: integer('quality').notNull(),
+    communication: integer('communication').notNull(),
+    timeliness: integer('timeliness').notNull(),
+    comment: text('comment'),
+    adminStatus: varchar('admin_status', { length: 20 }).notNull().default('pending'),
+    adminDecisionNote: text('admin_decision_note'),
+    approvedByUserId: integer('approved_by_user_id').references(() => users.id),
+    approvedAt: timestamp('approved_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow()
+  },
+  (t) => ({
+    oneReviewPerPurchaseUnique: uniqueIndex('business_owner_reviews_purchase_unique').on(
+      t.purchaseRequestId
+    )
+  })
+);
 
 export const teamsRelations = relations(teams, ({ many }) => ({
   teamMembers: many(teamMembers),
@@ -692,6 +730,8 @@ export type RetailInventoryAdjustment = typeof retailInventoryAdjustments.$infer
 export type NewRetailInventoryAdjustment = typeof retailInventoryAdjustments.$inferInsert;
 export type RetailPurchaseRequest = typeof retailPurchaseRequests.$inferSelect;
 export type NewRetailPurchaseRequest = typeof retailPurchaseRequests.$inferInsert;
+export type BusinessOwnerReview = typeof businessOwnerReviews.$inferSelect;
+export type NewBusinessOwnerReview = typeof businessOwnerReviews.$inferInsert;
 export type TeamDataWithMembers = Team & {
   teamMembers: (TeamMember & {
     user: Pick<User, 'id' | 'name' | 'email'>;

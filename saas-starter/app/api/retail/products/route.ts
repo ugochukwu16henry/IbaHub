@@ -51,6 +51,9 @@ export async function POST(request: Request) {
         warehouseId: payload.warehouseId,
         quantity: payload.quantity,
         reorderPoint: payload.reorderPoint,
+        images: payload.images ? JSON.stringify(payload.images) : null,
+        details: payload.details ? JSON.stringify(payload.details) : null,
+        variants: payload.variants ? JSON.stringify(payload.variants) : null,
         purchasePriceKobo: toKobo(payload.purchasePriceNaira),
         sellingPriceKobo: toKobo(payload.sellingPriceNaira)
       })

@@ -10,6 +10,8 @@ const LINKS = [
   ['Orders', '/dashboard/hub/retail/orders'],
   ['POS', '/dashboard/hub/retail/pos'],
   ['Purchase Requests', '/dashboard/hub/retail/purchase-requests'],
+  ['Reviews', '/dashboard/hub/retail/reviews'],
+  ['Storefront Settings', '/dashboard/hub/retail/storefront-settings'],
   ['Adjustments', '/dashboard/hub/retail/inventory-adjustments']
 ] as const;
 

@@ -127,11 +127,21 @@ Use your Paystack test keys and test cards in the Paystack dashboard to validate
 - Public storefront:
   - `/shops` lists public business shops
   - `/shops/:slug` shows products and lets buyers submit purchase requests
+  - `/shops/:slug/products/:id` shows detailed product page (sizes, views, extra details)
   - Buyers can view business map location and contact owner via phone/WhatsApp
   - Buyers can request rider/truck delivery and jump to `/dashboard/rides/book`
+  - Approved testimonials are displayed only after admin moderation
 - Purchase flow:
   - Buyer submits purchase request with agreed payment terms (`upfront`, `on_delivery`, etc.)
   - Business owner reviews requests at `/dashboard/hub/retail/purchase-requests`
+- Ratings & testimony flow:
+  - Buyer submits a quick survey after `fulfilled` purchase (`professionalism`, `honesty`, `quality`, `communication`, `timeliness`)
+  - Buyer and business owner can view review status in dashboard
+  - Admin-only approval via `/dashboard/hub/payments/reviews`
+  - Only approved reviews appear as storefront testimonials
+- Product catalog customization:
+  - Owners can add product images, variant rows (e.g. size/view), and arbitrary details
+  - Storefront visibility is customizable per business via `/dashboard/hub/retail/storefront-settings`
 
 - Business billing:
   - `Business` plan: **NGN 10,000/month** (upload products, prices, categories, public shop)

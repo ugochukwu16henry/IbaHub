@@ -29,6 +29,18 @@ export const itemInputSchema = z.object({
   warehouseId: z.number().int().positive().optional(),
   quantity: z.number().int().min(0).default(0),
   reorderPoint: z.number().int().min(0).default(0),
+  images: z.array(z.string().url()).optional(),
+  details: z.record(z.string(), z.string()).optional(),
+  variants: z
+    .array(
+      z.object({
+        name: z.string().min(1),
+        value: z.string().min(1),
+        extraPriceNaira: z.number().min(0).optional(),
+        stock: z.number().int().min(0).optional()
+      })
+    )
+    .optional(),
   purchasePriceNaira: z.number().min(0),
   sellingPriceNaira: z.number().min(0)
 });

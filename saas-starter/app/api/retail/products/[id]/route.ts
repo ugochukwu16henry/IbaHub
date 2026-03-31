@@ -51,6 +51,9 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
         warehouseId: payload.warehouseId,
         quantity: payload.quantity,
         reorderPoint: payload.reorderPoint,
+        images: payload.images ? JSON.stringify(payload.images) : undefined,
+        details: payload.details ? JSON.stringify(payload.details) : undefined,
+        variants: payload.variants ? JSON.stringify(payload.variants) : undefined,
         purchasePriceKobo:
           typeof payload.purchasePriceNaira === 'number' ? toKobo(payload.purchasePriceNaira) : undefined,
         sellingPriceKobo:
