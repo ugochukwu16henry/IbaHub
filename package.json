@@ -1,5 +1,6 @@
 {
   "name": "ibahub",
+  "private": true,
   "version": "1.0.0",
   "description": "In Ibibio, Iba means \"Two,\" but in the context of Uyo's modern slang and history, it often points to the city itself (the \"Land of Promise\"). It’s short, punchy, and easy to type into a browser.",
   "main": "index.js",
