@@ -1,0 +1,23 @@
+{
+  "name": "ibahub",
+  "version": "1.0.0",
+  "description": "In Ibibio, Iba means \"Two,\" but in the context of Uyo's modern slang and history, it often points to the city itself (the \"Land of Promise\"). It’s short, punchy, and easy to type into a browser.",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ugochukwu16henry/IbaHub.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ugochukwu16henry/IbaHub/issues"
+  },
+  "homepage": "https://github.com/ugochukwu16henry/IbaHub#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^25.5.0"
+  }
+}

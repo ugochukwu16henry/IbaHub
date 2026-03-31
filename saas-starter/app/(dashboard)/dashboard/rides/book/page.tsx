@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,7 +41,7 @@ const money = (kobo: number) =>
     maximumFractionDigits: 0
   }).format(kobo / 100);
 
-export default function RideBookingPage() {
+function RideBookingPageContent() {
   const searchParams = useSearchParams();
   const [pickupLabel, setPickupLabel] = useState('Campus main gate');
   const [dropoffLabel, setDropoffLabel] = useState('Hostel block B');
@@ -293,7 +293,7 @@ export default function RideBookingPage() {
             myBookings.map((b) => (
               <div key={b.id} className="border rounded-lg p-3 space-y-2">
                 <p className="font-medium">
-                  {b.pickupLabel} -> {b.dropoffLabel}
+                  {b.pickupLabel} {'->'} {b.dropoffLabel}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Rider: {b.riderName || 'N/A'} | Contact: {b.riderPhone || 'N/A'}
@@ -330,6 +330,14 @@ export default function RideBookingPage() {
         </CardContent>
       </Card>
     </section>
+  );
+}
+
+export default function RideBookingPage() {
+  return (
+    <Suspense fallback={<section className="flex-1 p-4 lg:p-8">Loading ride booking...</section>}>
+      <RideBookingPageContent />
+    </Suspense>
   );
 }
 

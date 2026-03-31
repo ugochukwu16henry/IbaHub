@@ -226,7 +226,7 @@ export default function RiderConsolePage() {
             bookings.map((b) => (
               <div key={b.id} className="border rounded-lg p-3 space-y-2">
                 <p className="font-medium">
-                  {b.pickupLabel} -> {b.dropoffLabel}
+                  {b.pickupLabel} {'->'} {b.dropoffLabel}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Customer: {b.customerName || b.customerEmail}

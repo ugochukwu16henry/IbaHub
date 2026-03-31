@@ -21,13 +21,19 @@ export async function GET(request: Request) {
       : undefined;
 
   const rows = await db
-    .select({
-      ...businessOwnerReviews,
-      teamName: teams.name
-    })
+    .select()
     .from(businessOwnerReviews)
     .innerJoin(teams, eq(businessOwnerReviews.teamId, teams.id))
     .where(whereExpr)
     .orderBy(desc(businessOwnerReviews.createdAt));
-  return Response.json({ reviews: rows, filters: { status: status || null, teamId: teamId || null } });
+
+  const reviews = rows.map((row) => ({
+    ...row.business_owner_reviews,
+    teamName: row.teams.name
+  }));
+
+  return Response.json({
+    reviews,
+    filters: { status: status || null, teamId: teamId || null }
+  });
 }
