@@ -7,9 +7,14 @@ import {
   updateTeamSubscription
 } from '@/lib/db/queries';
 
-export const stripe = new Stripe(process.env.PAYSTACK_SECRET_KEY!, {
-  apiVersion: '2025-04-30.basil'
-});
+function getStripeClient(): Stripe | null {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) return null;
+  return new Stripe(key, { apiVersion: '2025-04-30.basil' });
+}
+
+// Exported for legacy imports; may be null when Stripe is not configured.
+export const stripe = getStripeClient();
 
 export async function createCheckoutSession({
   team,
@@ -18,6 +23,12 @@ export async function createCheckoutSession({
   team: Team | null;
   priceId: string;
 }) {
+  const stripe = getStripeClient();
+  if (!stripe) {
+    // Stripe not configured (Paystack-only mode) — skip hosted checkout
+    redirect('/dashboard/hub/payments');
+  }
+
   const user = await getUser();
 
   if (!team || !user) {
@@ -47,6 +58,11 @@ export async function createCheckoutSession({
 }
 
 export async function createCustomerPortalSession(team: Team) {
+  const stripe = getStripeClient();
+  if (!stripe) {
+    redirect('/dashboard/hub/payments');
+  }
+
   if (!team.stripeCustomerId || !team.stripeProductId) {
     redirect('/pricing');
   }
@@ -117,6 +133,11 @@ export async function createCustomerPortalSession(team: Team) {
 export async function handleSubscriptionChange(
   subscription: Stripe.Subscription
 ) {
+  const stripe = getStripeClient();
+  if (!stripe) {
+    return;
+  }
+
   const customerId = subscription.customer as string;
   const subscriptionId = subscription.id;
   const status = subscription.status;
@@ -147,6 +168,29 @@ export async function handleSubscriptionChange(
 }
 
 export async function getStripePrices() {
+  const stripe = getStripeClient();
+  if (!stripe) {
+    // Fallback static pricing when Stripe is not configured
+    return [
+      {
+        id: 'base-local',
+        productId: 'base-local-product',
+        unitAmount: 800,
+        currency: 'usd',
+        interval: 'month',
+        trialPeriodDays: 7
+      },
+      {
+        id: 'plus-local',
+        productId: 'plus-local-product',
+        unitAmount: 1200,
+        currency: 'usd',
+        interval: 'month',
+        trialPeriodDays: 7
+      }
+    ];
+  }
+
   const prices = await stripe.prices.list({
     expand: ['data.product'],
     active: true,
@@ -165,6 +209,25 @@ export async function getStripePrices() {
 }
 
 export async function getStripeProducts() {
+  const stripe = getStripeClient();
+  if (!stripe) {
+    // Fallback static products when Stripe is not configured
+    return [
+      {
+        id: 'base-local-product',
+        name: 'Base',
+        description: 'Base subscription plan',
+        defaultPriceId: 'base-local'
+      },
+      {
+        id: 'plus-local-product',
+        name: 'Plus',
+        description: 'Plus subscription plan',
+        defaultPriceId: 'plus-local'
+      }
+    ];
+  }
+
   const products = await stripe.products.list({
     active: true,
     expand: ['data.default_price']

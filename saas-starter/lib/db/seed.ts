@@ -12,6 +12,13 @@ async function createStripeProducts() {
     return;
   }
 
+  if (!stripe) {
+    console.log(
+      'Stripe client not initialized; skipping Stripe product/price seed.'
+    );
+    return;
+  }
+
   console.log('Creating Stripe products and prices...');
 
   const baseProduct = await stripe.products.create({
