@@ -9,6 +9,7 @@ var app = builder.Build();
 QuestPDF.Settings.License = LicenseType.Community;
 
 var serviceToken = Environment.GetEnvironmentVariable("PDF_SERVICE_TOKEN");
+var brandName = Environment.GetEnvironmentVariable("IBAHUB_DOC_BRAND_NAME") ?? "IbaHub";
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok", engine = "QuestPDF" }));
 
@@ -42,6 +43,9 @@ app.MapPost("/v1/documents/render", async (HttpRequest request) =>
     {
         container.Page(page =>
         {
+            var isInvoice = string.Equals(model.Template, "invoice", StringComparison.OrdinalIgnoreCase);
+            var accent = isInvoice ? Colors.Blue.Medium : Colors.Green.Medium;
+
             page.Size(PageSizes.A4);
             page.Margin(24);
             page.DefaultTextStyle(x => x.FontSize(11));
@@ -49,7 +53,9 @@ app.MapPost("/v1/documents/render", async (HttpRequest request) =>
             page.Header().Column(col =>
             {
                 col.Spacing(4);
+                col.Item().Text(brandName).FontSize(12).FontColor(accent).SemiBold();
                 col.Item().Text(model.Title).FontSize(20).SemiBold();
+                col.Item().Text(isInvoice ? "INVOICE" : "RECEIPT").SemiBold().FontColor(accent);
                 col.Item().Text($"Reference: {model.Reference ?? "-"}");
                 col.Item().Text($"Issued At: {model.IssuedAtIso ?? DateTime.UtcNow.ToString("O")}");
             });
