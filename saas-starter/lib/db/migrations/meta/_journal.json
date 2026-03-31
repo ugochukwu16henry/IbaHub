@@ -85,6 +85,13 @@
       "when": 1774930000000,
       "tag": "0011_team_billing_tracking",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1774935000000,
+      "tag": "0012_retail_native_parity",
+      "breakpoints": true
     }
   ]
 }

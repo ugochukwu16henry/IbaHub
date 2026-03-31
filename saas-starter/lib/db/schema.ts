@@ -311,6 +311,150 @@ export const payoutLedger = pgTable('payout_ledger', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
+/** Native retail domain parity (QUANTUM-STASH modules) scoped per organization team. */
+export const retailWarehouses = pgTable('retail_warehouses', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id),
+  name: varchar('name', { length: 120 }).notNull(),
+  address: text('address'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow()
+});
+
+export const retailCategories = pgTable('retail_categories', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id),
+  name: varchar('name', { length: 120 }).notNull(),
+  description: text('description'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow()
+});
+
+export const retailBrands = pgTable('retail_brands', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id),
+  name: varchar('name', { length: 120 }).notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow()
+});
+
+export const retailUnits = pgTable('retail_units', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id),
+  name: varchar('name', { length: 60 }).notNull(),
+  abbreviation: varchar('abbreviation', { length: 20 }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow()
+});
+
+export const retailItems = pgTable(
+  'retail_items',
+  {
+    id: serial('id').primaryKey(),
+    teamId: integer('team_id')
+      .notNull()
+      .references(() => teams.id),
+    name: varchar('name', { length: 160 }).notNull(),
+    description: text('description'),
+    sku: varchar('sku', { length: 80 }).notNull(),
+    barcode: varchar('barcode', { length: 80 }),
+    categoryId: integer('category_id').references(() => retailCategories.id),
+    brandId: integer('brand_id').references(() => retailBrands.id),
+    unitId: integer('unit_id').references(() => retailUnits.id),
+    warehouseId: integer('warehouse_id').references(() => retailWarehouses.id),
+    quantity: integer('quantity').notNull().default(0),
+    reorderPoint: integer('reorder_point').notNull().default(0),
+    purchasePriceKobo: integer('purchase_price_kobo').notNull().default(0),
+    sellingPriceKobo: integer('selling_price_kobo').notNull().default(0),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow()
+  },
+  (t) => ({
+    skuPerTeamUnique: uniqueIndex('retail_items_team_sku_unique').on(t.teamId, t.sku)
+  })
+);
+
+export const retailOrders = pgTable('retail_orders', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id),
+  orderNumber: varchar('order_number', { length: 64 }).notNull(),
+  status: varchar('status', { length: 24 }).notNull().default('pending'),
+  customerName: varchar('customer_name', { length: 120 }),
+  customerEmail: varchar('customer_email', { length: 255 }),
+  subtotalKobo: integer('subtotal_kobo').notNull().default(0),
+  discountKobo: integer('discount_kobo').notNull().default(0),
+  taxKobo: integer('tax_kobo').notNull().default(0),
+  totalKobo: integer('total_kobo').notNull().default(0),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow()
+});
+
+export const retailOrderItems = pgTable('retail_order_items', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id),
+  orderId: integer('order_id')
+    .notNull()
+    .references(() => retailOrders.id),
+  itemId: integer('item_id')
+    .notNull()
+    .references(() => retailItems.id),
+  quantity: integer('quantity').notNull(),
+  unitPriceKobo: integer('unit_price_kobo').notNull(),
+  lineTotalKobo: integer('line_total_kobo').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow()
+});
+
+export const retailPosTransactions = pgTable(
+  'retail_pos_transactions',
+  {
+    id: serial('id').primaryKey(),
+    teamId: integer('team_id')
+      .notNull()
+      .references(() => teams.id),
+    orderId: integer('order_id').references(() => retailOrders.id),
+    idempotencyKey: varchar('idempotency_key', { length: 120 }).notNull(),
+    status: varchar('status', { length: 24 }).notNull().default('completed'),
+    amountKobo: integer('amount_kobo').notNull(),
+    paymentMethod: varchar('payment_method', { length: 40 }).notNull().default('cash'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow()
+  },
+  (t) => ({
+    posIdempotencyPerTeamUnique: uniqueIndex('retail_pos_team_idempotency_unique').on(
+      t.teamId,
+      t.idempotencyKey
+    )
+  })
+);
+
+export const retailInventoryAdjustments = pgTable('retail_inventory_adjustments', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id),
+  itemId: integer('item_id')
+    .notNull()
+    .references(() => retailItems.id),
+  delta: integer('delta').notNull(),
+  reason: varchar('reason', { length: 120 }).notNull().default('manual_adjustment'),
+  referenceType: varchar('reference_type', { length: 40 }),
+  referenceId: varchar('reference_id', { length: 80 }),
+  createdAt: timestamp('created_at').notNull().defaultNow()
+});
+
 export const teamsRelations = relations(teams, ({ many }) => ({
   teamMembers: many(teamMembers),
   activityLogs: many(activityLogs),
@@ -491,6 +635,24 @@ export type ServiceRequest = typeof serviceRequests.$inferSelect;
 export type NewServiceRequest = typeof serviceRequests.$inferInsert;
 export type ServiceReview = typeof serviceReviews.$inferSelect;
 export type NewServiceReview = typeof serviceReviews.$inferInsert;
+export type RetailWarehouse = typeof retailWarehouses.$inferSelect;
+export type NewRetailWarehouse = typeof retailWarehouses.$inferInsert;
+export type RetailCategory = typeof retailCategories.$inferSelect;
+export type NewRetailCategory = typeof retailCategories.$inferInsert;
+export type RetailBrand = typeof retailBrands.$inferSelect;
+export type NewRetailBrand = typeof retailBrands.$inferInsert;
+export type RetailUnit = typeof retailUnits.$inferSelect;
+export type NewRetailUnit = typeof retailUnits.$inferInsert;
+export type RetailItem = typeof retailItems.$inferSelect;
+export type NewRetailItem = typeof retailItems.$inferInsert;
+export type RetailOrder = typeof retailOrders.$inferSelect;
+export type NewRetailOrder = typeof retailOrders.$inferInsert;
+export type RetailOrderItem = typeof retailOrderItems.$inferSelect;
+export type NewRetailOrderItem = typeof retailOrderItems.$inferInsert;
+export type RetailPosTransaction = typeof retailPosTransactions.$inferSelect;
+export type NewRetailPosTransaction = typeof retailPosTransactions.$inferInsert;
+export type RetailInventoryAdjustment = typeof retailInventoryAdjustments.$inferSelect;
+export type NewRetailInventoryAdjustment = typeof retailInventoryAdjustments.$inferInsert;
 export type TeamDataWithMembers = Team & {
   teamMembers: (TeamMember & {
     user: Pick<User, 'id' | 'name' | 'email'>;

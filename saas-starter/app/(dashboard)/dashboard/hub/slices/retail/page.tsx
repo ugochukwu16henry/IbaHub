@@ -89,6 +89,11 @@ export default async function RetailSlicePage() {
       <p className="text-sm text-muted-foreground">
         QUANTUM-STASH integration for products and stock updates through IbaHub gateway.
       </p>
+      <div>
+        <Button asChild>
+          <Link href="/dashboard/hub/retail">Open full retail parity modules</Link>
+        </Button>
+      </div>
 
       <Card>
         <CardHeader>
