@@ -12,10 +12,29 @@ const supabaseAnonKey =
   process.env.SUPABASE_ANON_KEY ??
   '';
 
-const hasSupabaseConfig = Boolean(supabaseUrl && supabaseAnonKey);
+function normalizeEnv(value: string) {
+  return value.trim().replace(/^['"]|['"]$/g, '');
+}
+
+function isHttpUrl(value: string) {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+const normalizedSupabaseUrl = normalizeEnv(supabaseUrl);
+const normalizedSupabaseAnonKey = normalizeEnv(supabaseAnonKey);
+const hasSupabaseConfig =
+  Boolean(normalizedSupabaseUrl && normalizedSupabaseAnonKey) &&
+  normalizedSupabaseUrl !== '...' &&
+  normalizedSupabaseAnonKey !== '...' &&
+  isHttpUrl(normalizedSupabaseUrl);
 
 const supabase = hasSupabaseConfig
-  ? createClient(supabaseUrl, supabaseAnonKey, {
+  ? createClient(normalizedSupabaseUrl, normalizedSupabaseAnonKey, {
       auth: { persistSession: false }
     })
   : null;
