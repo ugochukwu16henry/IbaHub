@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 
+
 import { OptionCards } from "@/components/inventory/option-cards"
 import { ItemsSubheader } from "@/components/inventory/subheaders/items-subheader"
+import { ProductList } from "@/components/inventory/product-list"
 
 export default async function AppInventoryItemsPage(): Promise<JSX.Element> {
   const session = await auth()
@@ -11,6 +13,9 @@ export default async function AppInventoryItemsPage(): Promise<JSX.Element> {
   return (
     <div>
       <ItemsSubheader />
+      <div className="my-6">
+        <ProductList />
+      </div>
       <OptionCards />
     </div>
   )
