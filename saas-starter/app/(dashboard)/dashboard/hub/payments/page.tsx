@@ -57,6 +57,9 @@ export default function HubPaymentsPage() {
           <Button variant="outline" size="sm" asChild>
             <Link href="/dashboard/hub/payments/payouts">Admin payouts</Link>
           </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/dashboard/hub/payments/finance">Finance &amp; audit</Link>
+          </Button>
         </CardContent>
       </Card>
 

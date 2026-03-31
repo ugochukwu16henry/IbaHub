@@ -72,6 +72,10 @@ Use your Paystack test keys and test cards in the Paystack dashboard to validate
 - Rider flow: go online, receive requests, start ride only after payment, mark done.
 - Platform commission: 5% per rider booking (computed server-side).
 - Payout readiness: after customer confirmation, payout is auto-released after `PAYOUT_DELAY_MINUTES` (default: 30).
+- Background payout processing:
+  - cron endpoint: `GET /api/cron/payouts/process`
+  - secure with `CRON_SECRET` (sent as `Authorization: Bearer <CRON_SECRET>`).
+  - Vercel cron schedule is configured in `vercel.json` (every 5 minutes).
 - Core endpoints:
   - `GET /api/rides/nearest?pickupLat=..&pickupLng=..`
   - `POST /api/rides/bookings`
