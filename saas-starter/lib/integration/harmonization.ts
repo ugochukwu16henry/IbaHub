@@ -104,7 +104,7 @@ export const HARMONIZATION_STEPS: HarmonizationStep[] = [
     ],
     status: 'partial',
     implementationHint:
-      'e2e: pnpm test:e2e (smoke + security-headers); next.config.ts CSP + security headers; gateway auth + webhook secrets; webhook POST rate limit (WEBHOOK_RATE_LIMIT_PER_MINUTE) + Idempotency-Key → webhook_inbox dedupe; rotate credentials if exposed.'
+      'e2e: pnpm test:e2e (smoke + security-headers + integration-shell); next.config.ts CSP + security headers; gateway auth + webhook secrets; webhook POST rate limit (WEBHOOK_RATE_LIMIT_PER_MINUTE) + Idempotency-Key → webhook_inbox dedupe; rotate credentials if exposed.'
   }
 ];
 

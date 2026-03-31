@@ -23,17 +23,17 @@ async function proxy(
   request: NextRequest,
   context: { params: Promise<{ service: string; path?: string[] }> }
 ) {
+  const { service, path: pathSegments } = await context.params;
+  if (!isIntegrationServiceId(service)) {
+    return NextResponse.json({ error: 'Unknown service' }, { status: 404 });
+  }
+
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const team = await getTeamForUser();
-
-  const { service, path: pathSegments } = await context.params;
-  if (!isIntegrationServiceId(service)) {
-    return NextResponse.json({ error: 'Unknown service' }, { status: 404 });
-  }
 
   const validated = getValidatedIntegrationBaseUrl(service);
   if (!validated.ok) {
