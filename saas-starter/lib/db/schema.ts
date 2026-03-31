@@ -39,6 +39,7 @@ export const teams = pgTable('teams', {
   }),
   businessPhone: varchar('business_phone', { length: 30 }),
   businessWhatsapp: varchar('business_whatsapp', { length: 30 }),
+  businessWebsiteUrl: text('business_website_url'),
   businessAddress: text('business_address'),
   businessLat: integer('business_lat'),
   businessLng: integer('business_lng'),

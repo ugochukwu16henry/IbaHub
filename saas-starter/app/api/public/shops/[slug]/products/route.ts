@@ -14,6 +14,7 @@ export async function GET(_: Request, context: { params: Promise<{ slug: string 
       businessAddress: teams.businessAddress,
       businessPhone: teams.businessPhone,
       businessWhatsapp: teams.businessWhatsapp,
+      businessWebsiteUrl: teams.businessWebsiteUrl,
       businessLat: teams.businessLat,
       businessLng: teams.businessLng
     })

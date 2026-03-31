@@ -58,6 +58,12 @@ export default async function RetailOverviewPage() {
               className="rounded-md border border-input bg-transparent px-3 py-2 text-sm"
             />
             <input
+              name="businessWebsiteUrl"
+              placeholder="Business website URL (e.g. https://example.com)"
+              defaultValue={team.businessWebsiteUrl || ''}
+              className="rounded-md border border-input bg-transparent px-3 py-2 text-sm"
+            />
+            <input
               name="businessCategory"
               placeholder="Business category (e.g. Grocery)"
               defaultValue={team.businessCategory || ''}

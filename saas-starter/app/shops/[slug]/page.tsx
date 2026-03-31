@@ -20,6 +20,7 @@ export default function ShopDetailsPage() {
   const [shopAddress, setShopAddress] = useState('');
   const [shopPhone, setShopPhone] = useState('');
   const [shopWhatsapp, setShopWhatsapp] = useState('');
+  const [shopWebsiteUrl, setShopWebsiteUrl] = useState('');
   const [shopLat, setShopLat] = useState<number | null>(null);
   const [shopLng, setShopLng] = useState<number | null>(null);
   const [items, setItems] = useState<ShopItem[]>([]);
@@ -42,6 +43,7 @@ export default function ShopDetailsPage() {
           setShopAddress(data.shop.businessAddress || '');
           setShopPhone(data.shop.businessPhone || '');
           setShopWhatsapp(data.shop.businessWhatsapp || '');
+          setShopWebsiteUrl(data.shop.businessWebsiteUrl || '');
           setShopLat(
             typeof data.shop.businessLat === 'number' ? data.shop.businessLat / 1_000_000 : null
           );
@@ -98,16 +100,46 @@ export default function ShopDetailsPage() {
         {shopPhone ? ` Phone: ${shopPhone}` : ''}
         {shopWhatsapp ? ` | WhatsApp: ${shopWhatsapp}` : ''}
       </p>
-      {shopWhatsapp ? (
-        <a
-          href={`https://wa.me/${shopWhatsapp.replace(/[^\d]/g, '')}`}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-block rounded-md border px-3 py-2 text-sm hover:bg-gray-50"
-        >
-          Chat owner on WhatsApp
-        </a>
-      ) : null}
+      <div className="flex flex-wrap gap-2">
+        {shopPhone ? (
+          <a
+            href={`tel:${shopPhone.replace(/\s+/g, '')}`}
+            className="inline-block rounded-md border px-3 py-2 text-sm hover:bg-gray-50"
+          >
+            Call owner
+          </a>
+        ) : null}
+        {shopWhatsapp ? (
+          <a
+            href={`https://wa.me/${shopWhatsapp.replace(/[^\d]/g, '')}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-block rounded-md border px-3 py-2 text-sm hover:bg-gray-50"
+          >
+            Chat owner on WhatsApp
+          </a>
+        ) : null}
+        {shopLat !== null && shopLng !== null ? (
+          <a
+            href={`https://www.google.com/maps/dir/?api=1&destination=${shopLat},${shopLng}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-block rounded-md border px-3 py-2 text-sm hover:bg-gray-50"
+          >
+            Get directions
+          </a>
+        ) : null}
+        {shopWebsiteUrl ? (
+          <a
+            href={shopWebsiteUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-block rounded-md border px-3 py-2 text-sm hover:bg-gray-50"
+          >
+            Visit website
+          </a>
+        ) : null}
+      </div>
       {shopMapUrl ? (
         <img src={shopMapUrl} alt="Business location map" className="w-full rounded-md border object-cover" />
       ) : null}

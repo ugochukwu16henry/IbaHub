@@ -53,6 +53,7 @@ export const saveBusinessProfileAction = withTeam(async (formData, team) => {
   const businessName = String(formData.get('businessName') || '').trim();
   const businessPhone = String(formData.get('businessPhone') || '').trim();
   const businessWhatsapp = String(formData.get('businessWhatsapp') || '').trim();
+  const businessWebsiteUrlRaw = String(formData.get('businessWebsiteUrl') || '').trim();
   const businessAddress = String(formData.get('businessAddress') || '').trim();
   const businessLatRaw = Number(formData.get('businessLat') || 0);
   const businessLngRaw = Number(formData.get('businessLng') || 0);
@@ -64,6 +65,11 @@ export const saveBusinessProfileAction = withTeam(async (formData, team) => {
   if (!businessName || !businessPhone || !businessCategory) {
     throw new Error('Business name, phone, and category are required.');
   }
+  const businessWebsiteUrl = businessWebsiteUrlRaw
+    ? /^https?:\/\//i.test(businessWebsiteUrlRaw)
+      ? businessWebsiteUrlRaw
+      : `https://${businessWebsiteUrlRaw}`
+    : null;
 
   const slug = shopSlugRaw
     .replace(/[^a-z0-9-]+/g, '-')
@@ -86,6 +92,7 @@ export const saveBusinessProfileAction = withTeam(async (formData, team) => {
       name: businessName,
       businessPhone,
       businessWhatsapp: businessWhatsapp || null,
+      businessWebsiteUrl,
       businessAddress: businessAddress || null,
       businessLat:
         Number.isFinite(businessLatRaw) && businessLatRaw !== 0
