@@ -70,7 +70,7 @@ export const HARMONIZATION_STEPS: HarmonizationStep[] = [
     ],
     status: 'partial',
     implementationHint:
-      'Slices: /dashboard/hub/slices/*; list data: /dashboard/hub/data/* (INTEGRATION_*_LIST_PATH); wire real fleetbase / gig URLs.'
+      'Slices: /dashboard/hub/slices/*; list data: /dashboard/hub/data/* (INTEGRATION_*_LIST_PATH). Local logistics proof: pnpm mock:logistics + INTEGRATION_LOGISTICS_URL=http://localhost:4100 → health + gateway list.'
   },
   {
     step: 6,

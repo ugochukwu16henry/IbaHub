@@ -5,6 +5,7 @@
     "build": "next build",
     "start": "next start",
     "test:e2e": "playwright test",
+    "mock:logistics": "node scripts/mock-logistics-server.mjs",
     "db:setup": "npx tsx lib/db/setup.ts",
     "db:seed": "npx tsx lib/db/seed.ts",
     "db:generate": "drizzle-kit generate",
