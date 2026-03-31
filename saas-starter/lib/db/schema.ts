@@ -6,6 +6,7 @@ import {
   timestamp,
   integer,
   uniqueIndex,
+  boolean,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -117,16 +118,104 @@ export const invitations = pgTable('invitations', {
   status: varchar('status', { length: 20 }).notNull().default('pending'),
 });
 
+/** Student marketplace provider/org profile. */
+export const providerProfiles = pgTable(
+  'provider_profiles',
+  {
+    id: serial('id').primaryKey(),
+    teamId: integer('team_id')
+      .notNull()
+      .references(() => teams.id),
+    displayName: varchar('display_name', { length: 120 }).notNull(),
+    bio: text('bio'),
+    contactPhone: varchar('contact_phone', { length: 30 }),
+    contactWhatsapp: varchar('contact_whatsapp', { length: 30 }),
+    isActive: boolean('is_active').notNull().default(true),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  },
+  (t) => ({
+    providerTeamUnique: uniqueIndex('provider_profiles_team_unique').on(t.teamId),
+  })
+);
+
+export const serviceListings = pgTable('service_listings', {
+  id: serial('id').primaryKey(),
+  teamId: integer('team_id')
+    .notNull()
+    .references(() => teams.id),
+  title: varchar('title', { length: 120 }).notNull(),
+  category: varchar('category', { length: 60 }).notNull(),
+  description: text('description'),
+  priceKobo: integer('price_kobo').notNull(),
+  pricingType: varchar('pricing_type', { length: 20 }).notNull().default('fixed'),
+  availability: text('availability'),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const serviceRequests = pgTable('service_requests', {
+  id: serial('id').primaryKey(),
+  listingId: integer('listing_id')
+    .notNull()
+    .references(() => serviceListings.id),
+  requesterUserId: integer('requester_user_id')
+    .notNull()
+    .references(() => users.id),
+  providerTeamId: integer('provider_team_id')
+    .notNull()
+    .references(() => teams.id),
+  message: text('message'),
+  contactPhone: varchar('contact_phone', { length: 30 }),
+  status: varchar('status', { length: 20 }).notNull().default('requested'),
+  paymentStatus: varchar('payment_status', { length: 20 })
+    .notNull()
+    .default('unpaid'),
+  grossAmountKobo: integer('gross_amount_kobo').notNull(),
+  platformFeeKobo: integer('platform_fee_kobo').notNull(),
+  providerEarningsKobo: integer('provider_earnings_kobo').notNull(),
+  paidAt: timestamp('paid_at'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+export const serviceReviews = pgTable(
+  'service_reviews',
+  {
+    id: serial('id').primaryKey(),
+    requestId: integer('request_id')
+      .notNull()
+      .references(() => serviceRequests.id),
+    reviewerUserId: integer('reviewer_user_id')
+      .notNull()
+      .references(() => users.id),
+    rating: integer('rating').notNull(),
+    comment: text('comment'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+  },
+  (t) => ({
+    reviewPerRequestUnique: uniqueIndex('service_reviews_request_unique').on(
+      t.requestId
+    ),
+  })
+);
+
 export const teamsRelations = relations(teams, ({ many }) => ({
   teamMembers: many(teamMembers),
   activityLogs: many(activityLogs),
   invitations: many(invitations),
+  providerProfiles: many(providerProfiles),
+  serviceListings: many(serviceListings),
+  serviceRequests: many(serviceRequests),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
   teamMembers: many(teamMembers),
   invitationsSent: many(invitations),
   riderProfiles: many(riderProfiles),
+  serviceRequests: many(serviceRequests),
+  serviceReviews: many(serviceReviews),
 }));
 
 export const invitationsRelations = relations(invitations, ({ one }) => ({
@@ -169,6 +258,51 @@ export const riderProfilesRelations = relations(riderProfiles, ({ one }) => ({
   }),
 }));
 
+export const providerProfilesRelations = relations(
+  providerProfiles,
+  ({ one }) => ({
+    team: one(teams, {
+      fields: [providerProfiles.teamId],
+      references: [teams.id],
+    }),
+  })
+);
+
+export const serviceListingsRelations = relations(serviceListings, ({ one, many }) => ({
+  team: one(teams, {
+    fields: [serviceListings.teamId],
+    references: [teams.id],
+  }),
+  requests: many(serviceRequests),
+}));
+
+export const serviceRequestsRelations = relations(serviceRequests, ({ one, many }) => ({
+  listing: one(serviceListings, {
+    fields: [serviceRequests.listingId],
+    references: [serviceListings.id],
+  }),
+  requester: one(users, {
+    fields: [serviceRequests.requesterUserId],
+    references: [users.id],
+  }),
+  providerTeam: one(teams, {
+    fields: [serviceRequests.providerTeamId],
+    references: [teams.id],
+  }),
+  reviews: many(serviceReviews),
+}));
+
+export const serviceReviewsRelations = relations(serviceReviews, ({ one }) => ({
+  request: one(serviceRequests, {
+    fields: [serviceReviews.requestId],
+    references: [serviceRequests.id],
+  }),
+  reviewer: one(users, {
+    fields: [serviceReviews.reviewerUserId],
+    references: [users.id],
+  }),
+}));
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Team = typeof teams.$inferSelect;
@@ -183,6 +317,14 @@ export type WebhookInbox = typeof webhookInbox.$inferSelect;
 export type NewWebhookInbox = typeof webhookInbox.$inferInsert;
 export type Invitation = typeof invitations.$inferSelect;
 export type NewInvitation = typeof invitations.$inferInsert;
+export type ProviderProfile = typeof providerProfiles.$inferSelect;
+export type NewProviderProfile = typeof providerProfiles.$inferInsert;
+export type ServiceListing = typeof serviceListings.$inferSelect;
+export type NewServiceListing = typeof serviceListings.$inferInsert;
+export type ServiceRequest = typeof serviceRequests.$inferSelect;
+export type NewServiceRequest = typeof serviceRequests.$inferInsert;
+export type ServiceReview = typeof serviceReviews.$inferSelect;
+export type NewServiceReview = typeof serviceReviews.$inferInsert;
 export type TeamDataWithMembers = Team & {
   teamMembers: (TeamMember & {
     user: Pick<User, 'id' | 'name' | 'email'>;

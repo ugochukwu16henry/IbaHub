@@ -46,6 +46,9 @@ export default function DashboardLayout({
     if (href === '/dashboard/hub/riders') {
       return pathname.startsWith('/dashboard/hub/riders');
     }
+    if (href === '/dashboard/marketplace') {
+      return pathname.startsWith('/dashboard/marketplace');
+    }
     if (href === '/dashboard/hub') {
       return (
         pathname.startsWith('/dashboard/hub') &&
@@ -68,7 +71,8 @@ export default function DashboardLayout({
     { href: '/dashboard/hub/riders', icon: Bike, label: 'Rider verification' },
     { href: '/dashboard/hub/payments', icon: CreditCard, label: 'Hub payments' },
     { href: '/dashboard/hub/tenants', icon: Link2, label: 'Tenant mappings' },
-    { href: '/dashboard', icon: Users, label: 'Team' },
+    { href: '/dashboard', icon: Users, label: 'Organization' },
+    { href: '/dashboard/marketplace', icon: Users, label: 'Marketplace' },
     { href: '/dashboard/general', icon: Settings, label: 'General' },
     { href: '/dashboard/activity', icon: Activity, label: 'Activity' },
     { href: '/dashboard/security', icon: Shield, label: 'Security' }
