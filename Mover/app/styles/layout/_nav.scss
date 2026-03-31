@@ -1,0 +1,75 @@
+.navWrapper  {
+  .headerText {
+    @extend %centered;
+    h1 {
+      margin-bottom: 5px;
+      margin-top: 0;
+      padding-top: 15px;
+      @include fontFormat(40px, $primaryBlue, $l-spacing: 3px);
+      font-family: 'dayposter';
+    }
+  }
+  .nav {
+    @include flexbox($justify: space-around, $align-items: center);
+    margin: 2%;
+    @media screen and #{$mobile} {
+      @include flexbox($direction: column);
+    }
+    a {
+      margin: 15px 0 8px 0;
+      padding-bottom: 5px;
+      border-bottom: 2px solid transparent;
+      transition: all 300ms ease-in-out;
+      &:hover {
+        transition: all 300ms ease-in-out;
+        border-bottom: 2px solid $secondaryBlue;
+      }
+    }
+  }
+}
+
+.profileNav {
+  position: absolute;
+  top: 1%;
+  width: 250px;
+  a {
+    margin: 0;
+  }
+  @media screen and #{$mobile}{
+    position: inherit;
+    @include flexbox($align-items: center, $direction: column);
+  }
+  .yourProfile {
+    @include flexbox($align-items: center);
+    @media screen and (max-width: 1270px){
+      @include flexbox($direction: column);
+      width: 100px;
+      font-size: 14px;
+    }
+    a {
+      &:first-child {
+        @media screen and (max-width: 1270px){
+          display: none;
+        }
+      }
+      &:last-child {
+        margin-left: 25px;
+        @media screen and (max-width: 1270px){
+          margin-top: 0;
+        }
+      }
+      &:hover {
+        border-bottom: 2px solid transparent;
+      }
+    }
+    img {
+      width: 35px;
+      margin-left: 12px;
+      margin-right: 12px;
+      border-radius: 100%;
+      @media screen and (max-width: 1270px){
+        margin-left: 40px;
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+<div class="pageWrapper">
+
+    <div class="navWrapper container">
+      <div class="headerText">
+        {{#link-to 'index'}}<h1>MOVR
+          <img src='/img/cloud-icon.png'>
+          <img src='/img/cloud-icon.png'>
+          <img src='/img/cloud-icon.png'>
+        </h1>{{/link-to}}
+      </div>
+      <div class="nav">
+
+      {{#if session.isAuthenticated}}
+        {{#link-to 'post-a-move' session.uid}}Post a Move{{/link-to}}
+      {{else}}
+        {{#link-to 'sign-in'}}Post a Move{{/link-to}}
+      {{/if}}
+
+      {{#link-to 'about'}}About{{/link-to}}
+
+
+      {{#link-to 'mover-sign-up'}}<span>Become a Movr</span>{{/link-to}}
+      {{#if session.isAuthenticated}}
+        <div class="profileNav">
+          <div class="yourProfile">
+            {{#link-to 'user-profile' session.uid}}
+              Your Profile
+            {{/link-to}}
+            {{#link-to 'user-profile' session.uid}}
+              <img src='{{session.currentUser.profileImageURL}}'/>
+            {{/link-to}}
+            <a class="signOutBtn" href=""{{action 'logout'}}>Sign Out</a>
+          </div>
+        </div>
+        {{else}}
+          {{#link-to 'sign-in'}}Sign In{{/link-to}}
+        {{/if}}
+      </div>
+    </div>
+
+    {{liquid-outlet}}
+  <div class="footer">
+    <hr>
+    <div class="container">
+      <p>Created at Epicodus - {{#link-to 'about'}}Read About Our Team{{/link-to}} | &copy; 2016 All Rights Reserved</p>
+    </div>
+  </div>
+</div>

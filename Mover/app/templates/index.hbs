@@ -1,0 +1,46 @@
+<div class="homepageHeader">
+  <div class="container">
+    <h1>Moving isn't fun, but Movr makes it easy and affordable.</h1>
+    <h3>Post a move, and our approved movers will bid on a price to get the job done for you.</h3>
+  </div>
+</div>
+<div class="contentWrapper">
+    <div class="how-it-works">
+      <div class="item">
+        <h2 class="number">1</h2>
+        <h3>Post a Move</h3>
+        <p>Once you create an account, you will be able to post moves and view details about your moves.</p>
+      </div>
+      <div class="item">
+        <h2 class="number">2</h2>
+        <h3>Receive Bids</h3>
+        <p>Once your move is posted, you will start to receive bids from our approved movrs who want to help you out.</p>
+      </div>
+      <div class="item">
+        <h2 class="number">3</h2>
+        <h3>Get Movin</h3>
+        <p>You will accept a bid of a price you are willing to pay, and be in touch with your movr until the day of.</p>
+      </div>
+    </div>
+  <div class="homepageBanner">
+    <div class="postMove item">
+      {{#if session.isAuthenticated}}
+      <p>Need help moving your things?</p>
+      {{#link-to 'post-a-move' session.uid}}<h2 class="view">POST A MOVE</h2>{{/link-to}}
+      {{else}}
+      <p>Need help moving your things?</p>
+      {{#link-to 'sign-in'}}<h2 class="view">POST A MOVE</h2>{{/link-to}}
+      {{/if}}
+    </div>
+    <div class="viewMoves item">
+      <p>Already an approved movr?</p>
+      {{#link-to 'open-moves'}}<h2 class="view">VIEW OPEN MOVES</h2>{{/link-to}}
+    </div>
+  </div>
+  <div class="emailSignUp">
+    <h2>Subscribe to our email list!</h2>
+    {{ember-chimp formAction="//urbanteklabs.us13.list-manage.com/subscribe/post?u=dd866806eadd591ac7e155b03&amp;id=318256c95b"}}
+    {{#link-to 'email-thank-you'}}
+    {{/link-to}}
+  </div>
+</div>

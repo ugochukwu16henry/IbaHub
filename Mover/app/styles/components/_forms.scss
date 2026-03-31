@@ -1,0 +1,279 @@
+.bidFormSection {
+  margin: 2% 0;
+  @include flexbox($direction: column);
+  width: 100%;
+  label {
+    margin: 10px 0;
+  }
+  form {
+    @include flexbox($justify: center, $direction: column, $align-items: center);
+    width: 500px;
+    margin: 0 auto;
+    @media screen and #{$mobile}{
+      width: 95%;
+    }
+    input {
+      width: 100%;
+      height: 50px;
+      font-size: 16px;
+      @extend %bodyFont;
+      letter-spacing: 1px;
+      padding-left: 2%;
+      border: 1px solid black;
+    }
+    button {
+      margin: 2% auto 2% auto;
+      display: block;
+      padding: 5px 20px;
+    }
+  }
+  .secondaryButton {
+    padding: 5px 20px;
+  }
+}
+
+.editMove {
+  margin: 2% 0;
+  @include flexbox($direction: column);
+  width: 100%;
+  label {
+    margin: 15px 0;
+  }
+  form {
+    @include flexbox($justify: center, $direction: column);
+    width: 500px;
+    margin: 0 auto;
+    @media screen and #{$mobile}{
+      width: 95%;
+    }
+    input {
+      width: 100%;
+      margin-bottom: 10px;
+      height: 30px;
+      font-size: 16px;
+      @extend %bodyFont;
+      letter-spacing: 1px;
+      padding-left: 2%;
+      border: 1px solid black;
+    }
+    .userCheckboxContainer {
+      .userCheckboxes {
+        display: flex;
+        justify-content: space-between;
+      }
+    }
+  }
+}
+
+.signInContainer {
+  @include background-image(linear-gradient(rgba($primaryBlue, 0.6),
+  rgba($primaryBlue, 0.6)),url("#{$img-path}/house-car.jpg"));
+  height: 80vh;
+  min-height: 780px;
+  background-size: cover;
+  @include flexbox($justify: center, $align-items: center);
+  .forms {
+    width: 500px;
+    background-color: rgba($white, 0.7);
+    padding: 70px 40px;
+    @include flexbox($justify: space-between, $direction: column);
+    height: 600px;
+    border-radius: 5px;
+    @media screen and #{$mobile}{
+      width: 95%;
+    }
+  }
+  input {
+    width: 100%;
+    height: 50px;
+    font-size: 16px;
+    @extend %bodyFont;
+    letter-spacing: 1px;
+    padding-left: 5%;
+  }
+  button {
+    margin: 2% auto 2% auto;
+    display: block;
+  }
+  .signUp {
+    text-align: center;
+    color: $primaryBlue;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+}
+
+.postMoveContainer{
+  background-color: rgba($primaryBlue, 0.1);
+  padding: 2%;
+  color: $primaryBlue;
+  h1, h3 {
+    text-align: center;
+    max-width: 700px;
+    margin: 20px auto;
+  }
+}
+
+.postMoveForm {
+  max-width: 900px;
+  margin: 0 auto;
+  .form-group {
+    @include flexbox($direction: column);
+    input {
+      height: 40px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      @extend %bodyFont;
+      letter-spacing: 1px;
+      padding-left: 10px;
+    }
+    label {
+      margin-bottom: 5px;
+    }
+  }
+  .checkboxes {
+    padding: 15px 0;
+    @include flexbox($justify: space-between);
+  }
+  .longLat {
+    @include flexbox($justify: space-between);
+    .form-group {
+      flex: 1;
+      &:first-child{
+        margin-right: 5px;
+      }
+      @media screen and #{$mobile} {
+        width: 49%;
+      }
+    }
+  }
+  button {
+    display: block;
+    margin: 3% auto;
+  }
+}
+
+.checkboxContainer {
+  background-color: rgba($primaryBlue, 0.7);
+  @include fontFormat($color: $white, $l-spacing: 1px);
+  padding: 2% 10%;
+  p {
+    @extend %centered;
+  }
+  hr {
+    border: 1px solid $white;
+  }
+  .checkboxes {
+    @media screen and #{$mobile} {
+      @include flexbox($direction: column);
+    }
+    .form-group-check {
+      @media screen and #{$mobile} {
+        margin-bottom: 10px;
+      }
+    }
+  }
+}
+
+.applyContainer {
+  @include background-image(linear-gradient(rgba($primaryBlue, 0.6),
+  rgba($primaryBlue, 0.6)),url("#{$img-path}/work-girl.jpg"));
+  height: 80vh;
+  min-height: 780px;
+  background-size: cover;
+  @include flexbox($justify: center, $align-items: center, $direction: column);
+  .forms {
+    width: 500px;
+    background-color: rgba($white, 0.7);
+    padding: 30px 40px 70px 40px;
+    @include flexbox($justify: space-between, $direction: column);
+    height: 600px;
+    border-radius: 5px;
+    p {
+      @extend %centered;
+      @include fontFormat(24px, $primaryBlue, bold, $l-spacing: 2px);
+      margin: 0;
+      text-shadow: 1px 1px 1px $white;
+    }
+    @media screen and #{$mobile}{
+      width: 95%;
+    }
+  }
+  input {
+    width: 100%;
+    height: 50px;
+    font-size: 16px;
+    @extend %bodyFont;
+    letter-spacing: 1px;
+    padding-left: 5%;
+  }
+  button {
+    margin: 2% auto 2% auto;
+    display: block;
+  }
+  h1 {
+    @extend %centered;
+    @include fontFormat(42px, $white, $l-spacing: 3px, $l-height: 60px);
+    width: 90%;
+    text-shadow: 2px 2px 2px $primaryBlue;
+    @media screen and #{$mobile}{
+      margin-top: -200px;
+    }
+  }
+  h2 {
+    @extend %centered;
+    @include fontFormat(32px, $white, $l-spacing: 3px, $l-height: 60px);
+    width: 70%;
+    text-shadow: 2px 2px 2px $primaryBlue;
+    @media screen and #{$mobile}{
+      @include fontFormat(32px, $white, $l-spacing: 3px, $l-height: 40px);
+    }
+  }
+}
+
+// MailChimp forms
+
+.ember-chimp {
+  input {
+    width: 400px;
+    height: 50px;
+    font-size: 16px;
+    @extend %bodyFont;
+    letter-spacing: 1px;
+    padding-left: 5%;
+    margin-bottom: 5%;
+  }
+  &.idle, &.loading {
+    .chimp-says {
+      display: none;
+    }
+  }
+
+  &.success {
+    .chimp-says {
+      margin: 5% 0;
+      width: 500px;
+      line-height: 30px;
+      letter-spacing: 1px;
+      font-size: 18px;
+      color: palegreen;
+      @extend %centered;
+    }
+    input {
+      display: none;
+    }
+    button {
+      display: none;
+    }
+  }
+
+  &.error {
+    .chimp-says {
+      margin: 3% 0 5% 0;
+      color: tomato;
+      @extend %centered;
+      letter-spacing: 1px;
+      font-size: 17px;
+    }
+  }
+}

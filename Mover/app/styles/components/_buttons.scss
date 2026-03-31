@@ -1,0 +1,98 @@
+// -----------------------------------------------------------------------------
+// This file contains all styles related to the button component.
+// -----------------------------------------------------------------------------
+
+button {
+  align-self: center;
+  text-transform: uppercase;
+  @include fontFormat(14px, $white, lighter, 1px);
+  background: rgba($primaryBlue, .9);
+  border: 3px solid transparent;
+  padding: 10px 20px;
+  transition: all 300ms ease-in-out;
+  &:hover {
+    cursor: pointer;
+    color: $primaryBlue;
+    border: 3px solid $primaryBlue;
+    background: $white;
+    transition: all 300ms ease-in-out;
+  }
+}
+
+.primaryWhite {
+  margin-top: 2%;
+  @include fontFormat(14px, $primaryBlue, lighter, 1px);
+  background: rgba($white, .9);
+  border: 3px solid $primaryBlue;
+  padding: 10px 20px;
+  transition: all 300ms ease-in-out;
+  &:hover {
+    cursor: pointer;
+    color: $white;
+    border: 3px solid $white;
+    background: $primaryBlue;
+    transition: all 300ms ease-in-out;
+  }
+}
+
+.secondaryButton {
+  text-transform: none;
+  @include fontFormat(13px, $primaryBlue, normal, 1px);
+  background: $white;
+  border: 3px solid transparent;
+  padding: 10px 20px;
+  transition: all 300ms ease-in-out;
+  border: 1px solid $primaryBlue;
+  &:hover {
+    cursor: pointer;
+    border: 1px solid $primaryBlue;
+    color: $white;
+    background: rgba($primaryBlue, .9);
+    transition: all 300ms ease-in-out;
+    font-weight: normal;
+  }
+}
+
+#bidMove {
+  display: block;
+  margin: 0 auto;
+  margin-top: 20px;
+}
+
+.viewAllMoves {
+  @include fontFormat($color: $primaryBlue, $l-spacing: 1px);
+  margin: 15px 0 0 25px;
+  .fa {
+    margin-right: 15px;
+    font-size: 14px;
+    transition: all 300ms ease-in-out;
+  }
+  &:hover {
+    .fa {
+      transition: all 300ms ease-in-out;
+      margin-right: 25px;
+    }
+  }
+}
+
+// Mail Chimp Button
+
+.ember-chimp {
+  button {
+    display: block;
+    margin: 0 auto;
+    margin-top: 2%;
+    @include fontFormat(14px, $primaryBlue, lighter, 1px);
+    background: rgba($white, .9);
+    border: 3px solid $primaryBlue;
+    padding: 10px 20px;
+    transition: all 300ms ease-in-out;
+    &:hover {
+      cursor: pointer;
+      color: $white;
+      border: 3px solid $white;
+      background: $primaryBlue;
+      transition: all 300ms ease-in-out;
+    }
+  }
+}
