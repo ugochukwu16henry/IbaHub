@@ -1,3 +1,15 @@
+// POS TABLE
+export const pos = pgTable("pos", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  paymentMethod: varchar("payment_method", { length: 32 }).notNull(),
+  status: varchar("status", { length: 24 }).notNull().default("pending"),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+})
+
+export type POS = typeof pos.$inferSelect
+export type NewPOS = typeof pos.$inferInsert
 // ORDERS TABLE
 export const orders = pgTable("order", {
   id: serial("id").primaryKey(),
