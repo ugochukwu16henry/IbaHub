@@ -10,25 +10,25 @@ export default function HomePage() {
           <div className="lg:grid lg:grid-cols-12 lg:gap-8">
             <div className="sm:text-center md:max-w-2xl md:mx-auto lg:col-span-6 lg:text-left">
               <h1 className="text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl md:text-6xl">
-                Build Your SaaS
-                <span className="block text-orange-500">Faster Than Ever</span>
+                IbaHub — Uyo’s
+                <span className="block text-orange-500">
+                  All-in-One Life Engine
+                </span>
               </h1>
               <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-xl lg:text-lg xl:text-xl">
-                Launch your SaaS product in record time with our powerful,
-                ready-to-use template. Packed with modern technologies and
-                essential integrations.
+                Digitizing Uyo’s informal economy in one progressive web app:
+                student labor, plaza-to-home logistics, and market-side retail
+                intelligence, all backed by dedicated virtual accounts and
+                trust-based onboarding.
               </p>
               <div className="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
-                <a
-                  href="https://vercel.com/templates/next.js/next-js-saas-starter"
-                  target="_blank"
-                >
+                <a href="/dashboard/hub">
                   <Button
                     size="lg"
                     variant="outline"
                     className="text-lg rounded-full"
                   >
-                    Deploy your own
+                    Open IbaHub console
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </a>
@@ -55,11 +55,12 @@ export default function HomePage() {
               </div>
               <div className="mt-5">
                 <h2 className="text-lg font-medium text-gray-900">
-                  Next.js and React
+                  Digital labor market (Gig module)
                 </h2>
                 <p className="mt-2 text-base text-gray-500">
-                  Leverage the power of modern web technologies for optimal
-                  performance and developer experience.
+                  UNIUYO / AKSU students offer verified services (laundry,
+                  typing, cleaning) through an escrow-backed marketplace, so
+                  “broke student” becomes “paid student”.
                 </p>
               </div>
             </div>
@@ -70,11 +71,12 @@ export default function HomePage() {
               </div>
               <div className="mt-5">
                 <h2 className="text-lg font-medium text-gray-900">
-                  Postgres and Drizzle ORM
+                  Plaza-to-home logistics hub
                 </h2>
                 <p className="mt-2 text-base text-gray-500">
-                  Robust database solution with an intuitive ORM for efficient
-                  data management and scalability.
+                  Close the “WhatsApp commerce” delivery gap by routing orders
+                  from plaza vendors to a trusted pool of riders with
+                  real-time, data-light tracking.
                 </p>
               </div>
             </div>
@@ -85,11 +87,12 @@ export default function HomePage() {
               </div>
               <div className="mt-5">
                 <h2 className="text-lg font-medium text-gray-900">
-                  Stripe Integration
+                  Retail intelligence & virtual accounts
                 </h2>
                 <p className="mt-2 text-base text-gray-500">
-                  Seamless payment processing and subscription management with
-                  industry-leading Stripe integration.
+                  Replace paper-and-pen books with a simple sales tracker and
+                  Dedicated Virtual Accounts (via Paystack/Monnify), turning
+                  market shops into bankable, data-rich businesses.
                 </p>
               </div>
             </div>
@@ -102,22 +105,24 @@ export default function HomePage() {
           <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center">
             <div>
               <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
-                Ready to launch your SaaS?
+                Ready to digitize Uyo’s informal economy?
               </h2>
               <p className="mt-3 max-w-3xl text-lg text-gray-500">
-                Our template provides everything you need to get your SaaS up
-                and running quickly. Don't waste time on boilerplate - focus on
-                what makes your product unique.
+                IbaHub is a fintech-enabled utility: one PWA that unifies
+                riders, students, and market vendors with KYC, secure
+                payments, and real-time data. Start from the technical
+                roadmap, adapt the vertical slices, and plug in your own
+                services as Uyo’s economy comes online.
               </p>
             </div>
             <div className="mt-8 lg:mt-0 flex justify-center lg:justify-end">
-              <a href="https://github.com/nextjs/saas-starter" target="_blank">
+              <a href="/INTEGRATION_PLAN.md" target="_blank">
                 <Button
                   size="lg"
                   variant="outline"
                   className="text-lg rounded-full"
                 >
-                  View the code
+                  View the integration plan
                   <ArrowRight className="ml-3 h-6 w-6" />
                 </Button>
               </a>
