@@ -1,5 +1,4 @@
 import type { NextConfig } from 'next';
-import path from 'node:path';
 
 /** §3.8 — pragmatic CSP for App Router + Paystack + optional OIDC SSO. */
 function buildContentSecurityPolicy() {
@@ -33,9 +32,6 @@ const nextConfig: NextConfig = {
   experimental: {
     ppr: true,
     clientSegmentCache: true
-  },
-  turbopack: {
-    root: path.join(__dirname)
   },
   /** INTEGRATION_PLAN §3.8 — baseline security headers */
   async headers() {
